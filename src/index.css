@@ -1,0 +1,175 @@
+@import "tailwindcss";
+/* 
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background: #eef2ff;
+  color: #0f172a;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+.login,
+.signup {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #eef2ff;
+}
+
+.auth-card {
+  width: min(460px, 92vw);
+  background: #ffffff;
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.auth-card h1 {
+  margin: 0 0 1.25rem;
+  font-size: 2rem;
+  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  padding: 0.9rem;
+  background: #f8fafc;
+}
+
+.input-icon {
+  color: #64748b;
+  min-width: 1.2rem;
+  min-height: 1.2rem;
+}
+
+.input-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  color: #0f172a;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background: #1d4ed8;
+}
+
+.auth-footer {
+  margin-top: 1rem;
+  text-align: center;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.auth-footer a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(180deg, #eef2ff 0%, #e0f2fe 100%);
+}
+
+.landing-card {
+  width: min(620px, 92vw);
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #e0f2fe;
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.landing-badge-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.landing-hero h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.05;
+}
+
+.landing-hero p {
+  margin: 0;
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.landing-actions {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.landing-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.landing-feature-icon {
+  color: #2563eb;
+  min-width: 1.3rem;
+  min-height: 1.3rem;
+}
+
+ */
