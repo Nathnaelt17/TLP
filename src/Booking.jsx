@@ -54,6 +54,28 @@ function Booking() {
       notes: notes.trim(),
     }
 
+    const { data: existingBookings, error: fetchError } = await supabase
+      .from("bookings")
+      .select("id")
+      .match({
+        user_id: user.id,
+        destination: booking.destination,
+        check_in: booking.check_in,
+        check_out: booking.check_out,
+        guests: booking.guests,
+      })
+      .limit(1)
+
+    if (fetchError) {
+      toast.error("Could not verify booking uniqueness. Please try again.")
+      return
+    }
+
+    if (existingBookings?.length > 0) {
+      setErrors(["A booking with the same destination, dates, and guest count already exists."])
+      return
+    }
+
     const { data, error } = await supabase.from("bookings").insert([
       {
         user_id: user.id,
