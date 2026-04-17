@@ -30,7 +30,7 @@ function Header() {
 
   const navItems = [
     { label: "Home", href: "/home" },
-    { label: "Landmark", href: "/landmark" },
+    { label: "Destinations", href: "/destinations" },
     { label: "Booking", href: "/booking" },
   ]
 

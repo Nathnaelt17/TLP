@@ -27,7 +27,7 @@ function Home() {
             asChild
             className="rounded-full border border-white/15 bg-white/10 px-8 py-3 text-base font-medium text-slate-100 shadow-sm shadow-slate-950/20 backdrop-blur-sm transition hover:bg-white/15 hover:text-white"
           >
-            <Link to="/landmark">Start Exploring</Link>
+            <Link to="/destinations">Start Exploring</Link>
           </Button>
         </div>
       </section>

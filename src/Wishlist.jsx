@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { supabase } from "@/lib/supabase"
-import { LandmarkCard, landmarks } from "./Landmark.jsx"
+import { DestinationCard, destinations } from "./Landmark.jsx"
 import { useAuth } from "./context/AuthContext.jsx"
 
 export default function Wishlist() {
@@ -85,8 +85,8 @@ export default function Wishlist() {
     loadWishlist()
   }, [user])
 
-  const savedLandmarks = useMemo(
-    () => landmarks.filter((landmark) => wishlistIds.includes(landmark.id)),
+  const savedDestinations = useMemo(
+    () => destinations.filter((destination) => wishlistIds.includes(destination.id)),
     [wishlistIds]
   )
 
@@ -99,7 +99,7 @@ export default function Wishlist() {
           <p className="text-sm uppercase tracking-widest text-cyan-400">My Wishlist</p>
           <h1 className="mt-2 text-4xl font-bold sm:text-5xl">Saved Destinations</h1>
           <p className="mx-auto mt-4 max-w-2xl text-slate-400">
-            These are the landmarks you&apos;ve wishlisted. Remove items or visit the Landmarks page to add more.
+            These are the destinations you&apos;ve wishlisted. Remove items or visit the Destinations page to add more.
           </p>
         </div>
 
@@ -117,21 +117,21 @@ export default function Wishlist() {
           <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
             <p className="text-lg">Loading your wishlist...</p>
           </div>
-        ) : savedLandmarks.length === 0 ? (
+        ) : savedDestinations.length === 0 ? (
           <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
             <p className="text-lg text-white">Your wishlist is empty.</p>
             <p className="mt-2 text-sm text-slate-400">
-              Head back to the Landmarks page to save your favorite destinations.
+              Head back to the Destinations page to save your favorite destinations.
             </p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {savedLandmarks.map((landmark) => (
-              <LandmarkCard
-                key={landmark.id}
-                landmark={landmark}
+            {savedDestinations.map((destination) => (
+              <DestinationCard
+                key={destination.id}
+                landmark={destination}
                 isFavorite={true}
-                onToggleFavorite={() => toggleWishlist(landmark.id)}
+                onToggleFavorite={() => toggleWishlist(destination.id)}
               />
             ))}
           </div>

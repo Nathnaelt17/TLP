@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { useAuth } from "./context/AuthContext.jsx"
+import { destinations } from "./Landmark.jsx"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -22,6 +23,7 @@ function Booking() {
   const [notes, setNotes] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [bookingData, setBookingData] = useState(null)
+  const [bookings, setBookings] = useState([])
   const [errors, setErrors] = useState([])
 
   const validate = () => {
@@ -53,11 +55,29 @@ function Booking() {
       createdAt: new Date().toISOString(),
     }
 
+    const updatedBookings = [booking, ...bookings]
     setBookingData(booking)
+    setBookings(updatedBookings)
+    localStorage.setItem("bookings", JSON.stringify(updatedBookings))
     setSubmitted(true)
     setErrors([])
     toast.success("Booking request saved.")
   }
+
+  useEffect(() => {
+    if (destinations.length > 0 && !destination) {
+      setDestination(destinations[0].name)
+    }
+
+    const storedBookings = localStorage.getItem("bookings")
+    if (storedBookings) {
+      try {
+        setBookings(JSON.parse(storedBookings))
+      } catch (error) {
+        console.warn("Unable to parse stored bookings", error)
+      }
+    }
+  }, [])
 
   if (!user) {
     return (
@@ -107,12 +127,18 @@ function Booking() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="space-y-3">
                   <Label htmlFor="destination">Destination</Label>
-                  <Input
+                  <select
                     id="destination"
                     value={destination}
                     onChange={(event) => setDestination(event.target.value)}
-                    placeholder="Enter a destination"
-                  />
+                    className="w-full rounded-3xl border border-white/10 bg-slate-950/45 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-xl"
+                  >
+                    {destinations.map((item) => (
+                      <option key={item.id} value={item.name} className="bg-slate-950 text-white">
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-3">
@@ -189,6 +215,30 @@ function Booking() {
                 </div>
               </div>
             )}
+            <div className="mt-12 rounded-[2rem] border border-white/10 bg-slate-950/45 p-8 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
+              <h2 className="text-2xl font-semibold text-white">Already booked trips</h2>
+              {bookings.length === 0 ? (
+                <p className="mt-4 text-slate-300">No booked trips yet. Complete the form above to create your first booking.</p>
+              ) : (
+                <div className="mt-6 space-y-4">
+                  {bookings.map((trip, index) => (
+                    <div key={`${trip.destination}-${trip.checkIn}-${index}`} className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 text-slate-200">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.25em] text-cyan-300">Destination</p>
+                          <p className="mt-1 text-lg font-semibold text-white">{trip.destination}</p>
+                        </div>
+                        <div className="text-sm text-slate-400">
+                          <p>{trip.checkIn} → {trip.checkOut}</p>
+                          <p>{trip.guests} guest{trip.guests === 1 ? "" : "s"}</p>
+                        </div>
+                      </div>
+                      {trip.notes && <p className="mt-4 text-slate-300">Notes: {trip.notes}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

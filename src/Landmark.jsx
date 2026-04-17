@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card"
 import { Heart, HeartOff } from "lucide-react"
 
-export const landmarks = [
+export const destinations = [
   {
     id: 1,
     name: "Lalibela Rock Churches",
@@ -68,7 +68,7 @@ export const landmarks = [
   },
 ]
 
-export function LandmarkCard({ landmark, isFavorite, onToggleFavorite, disabled }) {
+export function DestinationCard({ landmark, isFavorite, onToggleFavorite, disabled }) {
   return (
     <Card className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl transition hover:shadow-xl hover:shadow-black/30">
       <div className="relative">
@@ -122,7 +122,7 @@ export function LandmarkCard({ landmark, isFavorite, onToggleFavorite, disabled 
   )
 }
 
-export default function Landmark() {
+export default function Destinations() {
   const [query, setQuery] = useState("")
   const [wishlistIds, setWishlistIds] = useState([])
   const [userId, setUserId] = useState(null)
@@ -215,15 +215,15 @@ export default function Landmark() {
 
   const filteredLandmarks = useMemo(() => {
     const search = query.toLowerCase().trim()
-    return landmarks.filter(
-      (landmark) =>
-        landmark.name.toLowerCase().includes(search) ||
-        landmark.location.toLowerCase().includes(search)
+    return destinations.filter(
+      (destination) =>
+        destination.name.toLowerCase().includes(search) ||
+        destination.location.toLowerCase().includes(search)
     )
   }, [query])
 
   return (
-    <section id="landmark" className="min-h-screen scroll-mt-28 bg-transparent py-20 text-white">
+    <section id="destinations" className="min-h-screen scroll-mt-28 bg-transparent py-20 text-white">
       <Toaster />
 
       <div className="mx-auto max-w-7xl px-6">
@@ -234,7 +234,7 @@ export default function Landmark() {
             Discover Ethiopia
           </p>
           <h1 className="mt-2 text-4xl font-bold sm:text-5xl">
-            Explore Landmarks
+            Explore Destinations
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-slate-400">
             Find breathtaking destinations and save your favorite places to visit later.
@@ -245,7 +245,7 @@ export default function Landmark() {
         <div className="mb-10 flex justify-center">
           <div className="w-full max-w-xl">
           <Input
-            placeholder="Search by name or location..."
+            placeholder="Search destinations by name or location..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full"
@@ -256,7 +256,7 @@ export default function Landmark() {
         {/* Grid */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filteredLandmarks.map((landmark) => (
-            <LandmarkCard
+            <DestinationCard
               key={landmark.id}
               landmark={landmark}
               isFavorite={wishlistIds.includes(landmark.id)}
@@ -275,7 +275,7 @@ export default function Landmark() {
         {/* Empty state */}
         {filteredLandmarks.length === 0 && (
           <div className="mt-16 text-center text-slate-400">
-            <p className="text-lg">No landmarks found</p>
+            <p className="text-lg">No destinations found</p>
             <p className="text-sm">Try a different search term</p>
           </div>
         )}

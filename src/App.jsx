@@ -3,7 +3,7 @@ import Header from "./Header.jsx"
 import Login from "./Login.jsx"
 import Signup from "./Signup.jsx"
 import Home from "./Home.jsx"
-import Landmark from "./Landmark.jsx"
+import Destinations from "./Landmark.jsx"
 import Booking from "./Booking.jsx"
 import Wishlist from "./Wishlist.jsx"
 import Profile from "./Profile.jsx"
@@ -26,7 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/landmark" element={<Landmark />} />
+        <Route path="/destinations" element={<Destinations />} />
         <Route
           path="/booking"
           element={
