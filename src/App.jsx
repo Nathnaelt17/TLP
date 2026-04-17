@@ -4,6 +4,7 @@ import Login from "./Login.jsx"
 import Signup from "./Signup.jsx"
 import Home from "./Home.jsx"
 import Destinations from "./Landmark.jsx"
+import DestinationDetail from "./DestinationDetail.jsx"
 import Booking from "./Booking.jsx"
 import Dashboard from "./Wishlist.jsx"
 import Profile from "./Profile.jsx"
@@ -19,40 +20,41 @@ function App() {
       style={{ backgroundImage }}
     >
       <div className="absolute inset-0 bg-slate-950/70" />
-      <div className="relative z-10">
+      <div className="relative z-10 pt-28">
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/destinations" element={<Destinations />} />
-        <Route
-          path="/booking"
-          element={
-            <ProtectedRoute>
-              <Booking />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-      </Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/destinations" element={<Destinations />} />
+          <Route path="/destination/:id" element={<DestinationDetail />} />
+          <Route
+            path="/booking"
+            element={
+              <ProtectedRoute>
+                <Booking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Routes>
       </div>
     </div>
   )

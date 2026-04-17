@@ -1,99 +1,114 @@
 import { useEffect, useMemo, useState } from "react"
 import { toast, Toaster } from "sonner"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
-import { Heart, HeartOff } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Heart, HeartOff, Search } from "lucide-react"
 
 export const destinations = [
   {
     id: 1,
-    name: "Lalibela Rock Churches",
-    location: "Amhara Region",
+    name: "Lalibela Rock-Hewn Churches",
+    location: "Amhara Region, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1609947017136-9daf32a5eb16?q=80&w=1200&auto=format&fit=crop",
+      "https://upload.wikimedia.org/wikipedia/commons/0/0f/Bete_Giyorgis_Lalibela.jpg",
     description:
-      "A UNESCO World Heritage site carved directly into volcanic rock.",
-    tag: "Popular",
+      "Famous 12th-century rock-carved churches and UNESCO World Heritage Site.",
+    details:
+      "Lalibela is one of the holiest cities in Ethiopia, known for its 11 medieval monolithic churches carved directly into rock. Built during the Zagwe dynasty, it remains an active pilgrimage site for Ethiopian Orthodox Christians.",
+    highlights: ["UNESCO World Heritage Site", "11 rock-hewn churches"],
+    tag: "Heritage",
   },
   {
     id: 2,
-    name: "Simien Mountains",
-    location: "Gondar",
+    name: "Simien Mountains National Park",
+    location: "Amhara Region, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1200&auto=format&fit=crop",
+      "https://upload.wikimedia.org/wikipedia/commons/6/6b/Simiens_Cliffs.jpg",
     description:
-      "Dramatic cliffs, deep valleys, and rare wildlife like the Gelada baboon.",
+      "Dramatic cliffs and rare wildlife in Ethiopia’s highest peaks.",
+    details:
+      "The Simien Mountains feature dramatic escarpments, deep valleys, and rare species such as the Ethiopian wolf and Gelada baboon.",
+    highlights: ["Ethiopian wolf", "High-altitude trekking"],
+    tag: "Adventure",
   },
   {
     id: 3,
     name: "Danakil Depression",
-    location: "Afar Region",
+    location: "Afar Region, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1200&auto=format&fit=crop",
-    description:
-      "One of the hottest places on Earth with surreal colorful landscapes.",
+      "https://upload.wikimedia.org/wikipedia/commons/3/3f/Dallol_Ethiopia.jpg",
+    description: "One of the hottest and most extreme places on Earth.",
+    details:
+      "The Danakil Depression contains lava lakes, salt flats, and colorful acid springs in one of the most hostile environments on Earth.",
+    highlights: ["Erta Ale volcano", "Dallol hot springs"],
+    tag: "Extreme",
   },
   {
     id: 4,
     name: "Blue Nile Falls",
-    location: "Bahir Dar",
+    location: "Bahir Dar, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?q=80&w=1200&auto=format&fit=crop",
-    description:
-      "A powerful waterfall known locally as 'Tis Issat' meaning 'Smoking Water'.",
+      "https://upload.wikimedia.org/wikipedia/commons/5/5c/Blue_Nile_Falls.jpg",
+    description: "Powerful waterfall on the Blue Nile River.",
+    details:
+      "Blue Nile Falls (Tis Issat) is a dramatic waterfall that becomes especially powerful during the rainy season.",
+    highlights: ["Lake Tana nearby", "Seasonal waterfall"],
     tag: "Nature",
   },
   {
     id: 5,
     name: "Harar Jugol",
-    location: "Harar",
+    location: "Harari Region, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1524492449090-1d9a4c4d2e9b?q=80&w=1200&auto=format&fit=crop",
-    description:
-      "A historic walled city filled with culture, markets, and ancient traditions.",
+      "https://upload.wikimedia.org/wikipedia/commons/0/0a/Harar_walls.jpg",
+    description: "Ancient walled city with deep cultural heritage.",
+    details:
+      "Harar is one of the oldest Islamic cities in Africa, known for its narrow alleyways, markets, and hyena feeding tradition.",
+    highlights: ["UNESCO site", "Old walled city"],
+    tag: "Culture",
   },
   {
     id: 6,
     name: "Bale Mountains",
-    location: "Oromia",
+    location: "Oromia Region, Ethiopia",
     image:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
-    description:
-      "A paradise for hikers with alpine scenery and unique wildlife.",
-    tag: "Adventure",
+      "https://upload.wikimedia.org/wikipedia/commons/1/1f/Bale_Mountains.jpg",
+    description: "High-altitude park with unique wildlife.",
+    details:
+      "The Bale Mountains offer afro-alpine scenery and are home to the endangered Ethiopian wolf.",
+    highlights: ["Sanetti Plateau", "Wildlife trekking"],
+    tag: "Wildlife",
   },
 ]
 
-export function DestinationCard({ landmark, isFavorite, onToggleFavorite, disabled }) {
+export function DestinationCard({
+  landmark,
+  isFavorite,
+  onToggleFavorite,
+  disabled,
+  onCardClick,
+}) {
   return (
-    <Card className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl transition hover:shadow-xl hover:shadow-black/30">
+    <Card
+      onClick={onCardClick}
+      className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl transition hover:scale-[1.02] hover:shadow-xl"
+    >
       <div className="relative">
         <img
           src={landmark.image}
           alt={landmark.name}
-          className="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56"
+          className="h-56 w-full object-cover transition group-hover:scale-105"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
         <button
-          onClick={onToggleFavorite}
-          disabled={disabled}
-          aria-label={
-            isFavorite
-              ? `Remove ${landmark.name} from wishlist`
-              : `Add ${landmark.name} to wishlist`
-          }
-          className={`absolute right-3 top-3 rounded-full p-2 backdrop-blur-md transition focus:outline-none focus:ring-2 focus:ring-cyan-400/50 ${
-            disabled
-              ? "cursor-not-allowed bg-slate-600/50 text-slate-300"
-              : isFavorite
-              ? "bg-red-500 text-white"
-              : "bg-white/20 text-white hover:bg-white/30"
+          onClick={(e) => {
+            e.stopPropagation()
+            if (!disabled) onToggleFavorite()
+          }}
+          className={`absolute right-3 top-3 rounded-full p-2 ${
+            isFavorite ? "bg-red-500 text-white" : "bg-white/20 text-white"
           }`}
         >
           {isFavorite ? (
@@ -102,21 +117,14 @@ export function DestinationCard({ landmark, isFavorite, onToggleFavorite, disabl
             <HeartOff className="h-4 w-4" />
           )}
         </button>
-
-        {landmark.tag && (
-          <span className="absolute left-3 top-3 rounded-full bg-cyan-500/80 px-3 py-1 text-xs font-medium text-white">
-            {landmark.tag}
-          </span>
-        )}
       </div>
 
-      <CardContent className="space-y-3 p-5">
-        <div>
-          <h3 className="text-lg font-semibold text-white">{landmark.name}</h3>
-          <p className="text-sm text-slate-400">{landmark.location}</p>
-        </div>
-
-        <p className="text-sm text-slate-300 line-clamp-3">{landmark.description}</p>
+      <CardContent className="p-4">
+        <h3 className="text-white font-semibold">{landmark.name}</h3>
+        <p className="text-sm text-slate-400">{landmark.location}</p>
+        <p className="text-sm text-slate-300 mt-2 line-clamp-2">
+          {landmark.description}
+        </p>
       </CardContent>
     </Card>
   )
@@ -126,160 +134,65 @@ export default function Destinations() {
   const [query, setQuery] = useState("")
   const [wishlistIds, setWishlistIds] = useState([])
   const [userId, setUserId] = useState(null)
-  const [loadingWishlist, setLoadingWishlist] = useState(true)
-
-  const fetchWishlist = async (userUuid) => {
-    setLoadingWishlist(true)
-    const { data, error } = await supabase
-      .from("wishlist")
-      .select("landmark_id")
-      .eq("user_id", userUuid)
-
-    if (error) {
-      toast.error("Unable to load your wishlist.")
-      setWishlistIds([])
-      setLoadingWishlist(false)
-      return
-    }
-
-    setWishlistIds(data.map((item) => item.landmark_id))
-    setLoadingWishlist(false)
-  }
-
-  const addToWishlist = async (landmarkId) => {
-    const { error } = await supabase.from("wishlist").insert({
-      user_id: userId,
-      landmark_id: landmarkId,
-    })
-
-    if (error) {
-      toast.error("Could not add this destination to your dashboard.")
-      return
-    }
-
-    setWishlistIds((current) => [...current, landmarkId])
-    toast.success("Added to your dashboard.")
-  }
-
-  const removeFromWishlist = async (landmarkId) => {
-    const { error } = await supabase
-      .from("wishlist")
-      .delete()
-      .eq("user_id", userId)
-      .eq("landmark_id", landmarkId)
-
-    if (error) {
-      toast.error("Could not remove this destination from your dashboard.")
-      return
-    }
-
-    setWishlistIds((current) => current.filter((id) => id !== landmarkId))
-    toast.success("Removed from your dashboard.")
-  }
-
-  const toggleWishlist = async (landmarkId) => {
-    if (!userId) {
-      toast("Please log in to save favorites to your dashboard.")
-      return
-    }
-
-    if (wishlistIds.includes(landmarkId)) {
-      await removeFromWishlist(landmarkId)
-    } else {
-      await addToWishlist(landmarkId)
-    }
-  }
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const loadUserAndWishlist = async () => {
-      const { data, error } = await supabase.auth.getUser()
-      const user = data?.user ?? null
-
-      if (error) {
-        setUserId(null)
-        setLoadingWishlist(false)
-        return
-      }
-
-      if (user) {
-        setUserId(user.id)
-        await fetchWishlist(user.id)
-      } else {
-        setUserId(null)
-        setLoadingWishlist(false)
-      }
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUserId(data?.user?.id || null)
     }
-
-    loadUserAndWishlist()
+    loadUser()
   }, [])
 
-  const filteredLandmarks = useMemo(() => {
-    const search = query.toLowerCase().trim()
+  const toggleWishlist = async (id) => {
+    if (!userId) return toast("Please log in first")
+
+    if (wishlistIds.includes(id)) {
+      setWishlistIds((p) => p.filter((x) => x !== id))
+    } else {
+      setWishlistIds((p) => [...p, id])
+    }
+  }
+
+  const filtered = useMemo(() => {
     return destinations.filter(
-      (destination) =>
-        destination.name.toLowerCase().includes(search) ||
-        destination.location.toLowerCase().includes(search)
+      (d) =>
+        d.name.toLowerCase().includes(query.toLowerCase()) ||
+        d.location.toLowerCase().includes(query.toLowerCase())
     )
   }, [query])
 
   return (
-    <section id="destinations" className="min-h-screen scroll-mt-28 bg-transparent py-20 text-white">
+    <div className="min-h-screen text-white p-10">
       <Toaster />
 
-      <div className="mx-auto max-w-7xl px-6">
-        
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <p className="text-sm uppercase tracking-widest text-cyan-400">
-            Discover Ethiopia
-          </p>
-          <h1 className="mt-2 text-4xl font-bold sm:text-5xl">
-            Explore Destinations
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-400">
-            Find breathtaking destinations and save your favorite places to visit later.
-          </p>
-        </div>
+      <h1 className="text-4xl font-bold mb-6">Explore Destinations</h1>
 
-        {/* Search */}
-        <div className="mb-10 flex justify-center">
-          <div className="w-full max-w-xl">
-          <Input
-            placeholder="Search destinations by name or location..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full"
-          />
+      <div className="relative mb-8 max-w-2xl">
+        <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
+          <Search className="h-5 w-5" />
         </div>
-        </div>
-
-        {/* Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredLandmarks.map((landmark) => (
-            <DestinationCard
-              key={landmark.id}
-              landmark={landmark}
-              isFavorite={wishlistIds.includes(landmark.id)}
-              onToggleFavorite={() => toggleWishlist(landmark.id)}
-              disabled={loadingWishlist && !!userId}
-            />
-          ))}
-        </div>
-
-        {loadingWishlist && userId && (
-          <div className="mt-12 rounded-3xl border border-white/10 bg-slate-950/45 p-8 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
-            Loading your dashboard...
-          </div>
-        )}
-
-        {/* Empty state */}
-        {filteredLandmarks.length === 0 && (
-          <div className="mt-16 text-center text-slate-400">
-            <p className="text-lg">No destinations found</p>
-            <p className="text-sm">Try a different search term</p>
-          </div>
-        )}
+        <Input
+          type="search"
+          placeholder="Search destinations..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full rounded-[2rem] border border-white/15 bg-slate-900/90 px-14 py-4 text-base text-slate-100 shadow-xl shadow-black/20 outline-none transition duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+        />
       </div>
-    </section>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        {filtered.map((d) => (
+          <DestinationCard
+            key={d.id}
+            landmark={d}
+            isFavorite={wishlistIds.includes(d.id)}
+            onToggleFavorite={() => toggleWishlist(d.id)}
+            disabled={!userId}
+            onCardClick={() => navigate(`/destination/${d.id}`)}
+          />
+        ))}
+      </div>
+    </div>
   )
 }
