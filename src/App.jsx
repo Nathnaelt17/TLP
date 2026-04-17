@@ -5,7 +5,7 @@ import Signup from "./Signup.jsx"
 import Home from "./Home.jsx"
 import Destinations from "./Landmark.jsx"
 import Booking from "./Booking.jsx"
-import Wishlist from "./Wishlist.jsx"
+import Dashboard from "./Wishlist.jsx"
 import Profile from "./Profile.jsx"
 import ForgotPassword from "./ForgotPassword.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
@@ -36,10 +36,10 @@ function App() {
           }
         />
         <Route
-          path="/wishlist"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Wishlist />
+              <Dashboard />
             </ProtectedRoute>
           }
         />

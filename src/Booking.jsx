@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { useAuth } from "./context/AuthContext.jsx"
+import { supabase } from "./supabase-client"
 import { destinations } from "./Landmark.jsx"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +24,6 @@ function Booking() {
   const [notes, setNotes] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [bookingData, setBookingData] = useState(null)
-  const [bookings, setBookings] = useState([])
   const [errors, setErrors] = useState([])
 
   const validate = () => {
@@ -38,7 +38,7 @@ function Booking() {
     return validationErrors
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const validationErrors = validate()
     if (validationErrors.length > 0) {
@@ -48,17 +48,36 @@ function Booking() {
 
     const booking = {
       destination: destination.trim(),
-      checkIn,
-      checkOut,
+      check_in: checkIn,
+      check_out: checkOut,
       guests,
       notes: notes.trim(),
-      createdAt: new Date().toISOString(),
     }
 
-    const updatedBookings = [booking, ...bookings]
-    setBookingData(booking)
-    setBookings(updatedBookings)
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings))
+    const { data, error } = await supabase.from("bookings").insert([
+      {
+        user_id: user.id,
+        destination: booking.destination,
+        check_in: booking.check_in,
+        check_out: booking.check_out,
+        guests: booking.guests,
+        notes: booking.notes,
+      },
+    ])
+
+    if (error) {
+      toast.error("Could not save your booking. Please try again.")
+      return
+    }
+
+    setBookingData({
+      destination: booking.destination,
+      checkIn: booking.check_in,
+      checkOut: booking.check_out,
+      guests: booking.guests,
+      notes: booking.notes,
+      createdAt: data?.[0]?.created_at || new Date().toISOString(),
+    })
     setSubmitted(true)
     setErrors([])
     toast.success("Booking request saved.")
@@ -67,15 +86,6 @@ function Booking() {
   useEffect(() => {
     if (destinations.length > 0 && !destination) {
       setDestination(destinations[0].name)
-    }
-
-    const storedBookings = localStorage.getItem("bookings")
-    if (storedBookings) {
-      try {
-        setBookings(JSON.parse(storedBookings))
-      } catch (error) {
-        console.warn("Unable to parse stored bookings", error)
-      }
     }
   }, [])
 
@@ -86,7 +96,7 @@ function Booking() {
           <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center shadow-xl shadow-slate-950/30 backdrop-blur-xl">
             <h2 className="text-3xl font-semibold text-white">You must log in to use this feature</h2>
             <p className="mt-4 text-slate-400">
-              Please sign in to make a booking and access your wishlist.
+              Please sign in to make a booking and access your dashboard.
             </p>
             <Link
               to="/login"
@@ -109,7 +119,7 @@ function Booking() {
             <CardHeader className="space-y-4 text-center">
               <CardTitle>Book Your Trip</CardTitle>
               <CardDescription>
-                Fill out the booking form to request your next destination. All fields are easy to complete and instantly saved locally.
+                Fill out the booking form to request your next destination. All fields are easy to complete and saved securely.
               </CardDescription>
             </CardHeader>
 
@@ -186,7 +196,7 @@ function Booking() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-cyan-500 text-white shadow-xl shadow-cyan-500/20 transition duration-200 hover:bg-cyan-400 hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-cyan-300/50">
                 Submit Booking
               </Button>
             </form>
@@ -215,30 +225,6 @@ function Booking() {
                 </div>
               </div>
             )}
-            <div className="mt-12 rounded-[2rem] border border-white/10 bg-slate-950/45 p-8 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
-              <h2 className="text-2xl font-semibold text-white">Already booked trips</h2>
-              {bookings.length === 0 ? (
-                <p className="mt-4 text-slate-300">No booked trips yet. Complete the form above to create your first booking.</p>
-              ) : (
-                <div className="mt-6 space-y-4">
-                  {bookings.map((trip, index) => (
-                    <div key={`${trip.destination}-${trip.checkIn}-${index}`} className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 text-slate-200">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm uppercase tracking-[0.25em] text-cyan-300">Destination</p>
-                          <p className="mt-1 text-lg font-semibold text-white">{trip.destination}</p>
-                        </div>
-                        <div className="text-sm text-slate-400">
-                          <p>{trip.checkIn} → {trip.checkOut}</p>
-                          <p>{trip.guests} guest{trip.guests === 1 ? "" : "s"}</p>
-                        </div>
-                      </div>
-                      {trip.notes && <p className="mt-4 text-slate-300">Notes: {trip.notes}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>

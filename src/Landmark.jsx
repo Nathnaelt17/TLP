@@ -153,12 +153,12 @@ export default function Destinations() {
     })
 
     if (error) {
-      toast.error("Could not add this destination to your wishlist.")
+      toast.error("Could not add this destination to your dashboard.")
       return
     }
 
     setWishlistIds((current) => [...current, landmarkId])
-    toast.success("Added to your wishlist.")
+    toast.success("Added to your dashboard.")
   }
 
   const removeFromWishlist = async (landmarkId) => {
@@ -169,17 +169,17 @@ export default function Destinations() {
       .eq("landmark_id", landmarkId)
 
     if (error) {
-      toast.error("Could not remove this destination from your wishlist.")
+      toast.error("Could not remove this destination from your dashboard.")
       return
     }
 
     setWishlistIds((current) => current.filter((id) => id !== landmarkId))
-    toast.success("Removed from your wishlist.")
+    toast.success("Removed from your dashboard.")
   }
 
   const toggleWishlist = async (landmarkId) => {
     if (!userId) {
-      toast("Please log in to save favorites.")
+      toast("Please log in to save favorites to your dashboard.")
       return
     }
 
@@ -268,7 +268,7 @@ export default function Destinations() {
 
         {loadingWishlist && userId && (
           <div className="mt-12 rounded-3xl border border-white/10 bg-slate-950/45 p-8 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
-            Loading your wishlist...
+            Loading your dashboard...
           </div>
         )}
 

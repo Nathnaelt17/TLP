@@ -35,7 +35,7 @@ function Header() {
   ]
 
   if (user) {
-    navItems.push({ label: "Wishlist", href: "/wishlist" })
+    navItems.push({ label: "Dashboard", href: "/dashboard" })
   }
 
   const profileInitial = user?.username?.[0]?.toUpperCase() || user?.name?.[0]?.toUpperCase() || "U"
