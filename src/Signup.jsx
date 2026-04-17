@@ -42,7 +42,21 @@ function Signup() {
     setSignupError("")
     setIsLoading(true)
 
-    if (!name || !username || !email || !phone || !address || !dob || !password) {
+    const normalizedName = name.trim()
+    const normalizedUsername = username.trim()
+    const normalizedEmail = email.trim().toLowerCase()
+    const normalizedPhone = phone.replace(/\D/g, "")
+    const normalizedAddress = address.trim()
+
+    if (
+      !normalizedName ||
+      !normalizedUsername ||
+      !normalizedEmail ||
+      !normalizedPhone ||
+      !normalizedAddress ||
+      !dob ||
+      !password
+    ) {
       setSignupError("Please fill in all fields.")
       setIsLoading(false)
       return
@@ -52,13 +66,13 @@ function Signup() {
     const phonePattern = /^[0-9]{10}$/
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/
 
-    if (!emailPattern.test(email)) {
+    if (!emailPattern.test(normalizedEmail)) {
       setSignupError("Email must be a valid gmail.com or yahoo.com address.")
       setIsLoading(false)
       return
     }
 
-    if (!phonePattern.test(phone)) {
+    if (!phonePattern.test(normalizedPhone)) {
       setSignupError("Phone must be a 10-digit number.")
       setIsLoading(false)
       return
@@ -74,14 +88,14 @@ function Signup() {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           data: {
-            name,
-            username,
-            phone,
-            address,
+            name: normalizedName,
+            username: normalizedUsername,
+            phone: normalizedPhone,
+            address: normalizedAddress,
             dob,
           },
         },
@@ -89,6 +103,22 @@ function Signup() {
 
       if (error) {
         throw error
+      }
+
+      if (data?.user) {
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          name: normalizedName,
+          username: normalizedUsername,
+          email: normalizedEmail,
+          phone: normalizedPhone,
+          address: normalizedAddress,
+          dob,
+        })
+
+        if (profileError) {
+          throw profileError
+        }
       }
 
       if (!data.session) {
@@ -102,11 +132,11 @@ function Signup() {
 
       const userProfile = {
         id: data.user?.id,
-        name,
-        username,
-        email,
-        phone,
-        address,
+        name: normalizedName,
+        username: normalizedUsername,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        address: normalizedAddress,
         dob,
       }
 

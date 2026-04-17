@@ -22,32 +22,32 @@ function Login() {
 
     try {
       const loginIdentifier = identifier.trim()
-      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier)
-      let emailToUse = loginIdentifier
+      const normalizedIdentifier = loginIdentifier.toLowerCase()
+      const normalizedPhone = loginIdentifier.replace(/\D/g, "")
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedIdentifier)
+      const isPhone = /^[\d\s()+-]+$/.test(loginIdentifier) && normalizedPhone.length === 10
+      let emailToUse = normalizedIdentifier
 
       if (!isEmail) {
-        const lookupKey = loginIdentifier.replace(/"/g, "\\\"")
+        const lookupColumn = isPhone ? "phone" : "username"
+        const lookupValue = isPhone ? normalizedPhone : loginIdentifier
         const { data: lookupData, error: lookupError } = await supabase
           .from("profiles")
           .select("email")
-          .or(`username.eq.\"${lookupKey}\",phone.eq.\"${lookupKey}\"`)
-          .single()
+          .eq(lookupColumn, lookupValue)
+          .maybeSingle()
 
         if (lookupError) {
-          if (lookupError.code === "PGRST116") {
-            setError("No account found for that username or phone number.")
-            return
-          }
           console.error("Profile lookup error:", lookupError)
           throw lookupError
         }
 
         if (!lookupData?.email) {
-          setError("No account found for that username or phone number.")
+          setError(`No account found for that ${isPhone ? "phone number" : "username"}.`)
           return
         }
 
-        emailToUse = lookupData.email
+        emailToUse = lookupData.email.trim().toLowerCase()
       }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -56,6 +56,10 @@ function Login() {
       })
 
       if (signInError) {
+        if (signInError.status === 400 || signInError.status === 401) {
+          setError("Invalid login credentials. Please check your identifier and password.")
+          return
+        }
         throw signInError
       }
 
@@ -74,7 +78,7 @@ function Login() {
         id: data.user?.id,
         name: profileData?.name ?? metadata.name ?? "",
         username: profileData?.username ?? metadata.username ?? "",
-        email: profileData?.email ?? data.user?.email ?? identifier.trim(),
+        email: profileData?.email ?? data.user?.email ?? loginIdentifier,
         phone: profileData?.phone ?? metadata.phone ?? "",
         address: profileData?.address ?? metadata.address ?? "",
         dob: profileData?.dob ?? metadata.dob ?? "",
@@ -83,7 +87,9 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(userProfile))
       navigate("/home")
     } catch (loginError) {
-      console.error("Login error:", loginError)
+      if (loginError?.status !== 400) {
+        console.error("Login error:", loginError)
+      }
       setError(loginError?.message || "Invalid email or password.")
     } finally {
       setIsLoading(false)
@@ -217,7 +223,7 @@ function Login() {
                     </div>
                   )}
 
-                  {/* ✅ UPDATED SIGN IN BUTTON */}
+                  
                   <Button
                     className="w-full bg-cyan-700 text-white hover:bg-cyan-800 font-semibold shadow-md disabled:opacity-60"
                     type="submit"

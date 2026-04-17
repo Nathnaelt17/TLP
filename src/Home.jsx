@@ -1,7 +1,6 @@
-import Header from "./Header.jsx"
 import Landmark from "./Landmark.jsx"
-import About from "./Aboutus.jsx"
-import Contact from "./Contact.jsx"
+import Booking from "./Booking.jsx"
+import Wishlist from "./Wishlist.jsx"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -15,7 +14,6 @@ import {
 function Home() {
   return (
     <main className="bg-slate-950">
-      <Header />
       <section
         id="home"
         className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat px-6 pt-32 pb-16 text-center text-white sm:px-8 lg:px-12"
@@ -36,34 +34,17 @@ function Home() {
           </p>
 
           <Button
-            asChild
-            className="rounded-full bg-cyan-600 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-500"
+          asChild
+            className="rounded-full border border-white/15 bg-white/10 px-8 py-3 text-base font-medium text-slate-100 shadow-sm shadow-slate-950/20 backdrop-blur-sm transition hover:bg-white/15 hover:text-white"
           >
             <a href="#landmark">Start Exploring</a>
           </Button>
         </div>
       </section>
 
-      <section className="mx-auto max-w-4xl px-6 py-14 sm:px-8">
-        <Card className="mx-auto max-w-2xl rounded-[1.75rem] border border-slate-800 bg-slate-950/95 text-white shadow-xl">
-          <CardHeader>
-            <CardTitle>Project Overview</CardTitle>
-            <CardDescription>
-              Track progress and recent activity for your Vite app.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-slate-200">
-            Your design system is ready. Start building your next component.
-          </CardContent>
-          <CardFooter className="border-t border-slate-800 pt-4 text-sm text-slate-400">
-            Built with a modern component system for rapid UI iteration.
-          </CardFooter>
-        </Card>
-      </section>
-
       <Landmark />
-      <About />
-      <Contact />
+      <Booking />
+      <Wishlist />
     </main>
   )
 }

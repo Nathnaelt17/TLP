@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom"
+
 const navItems = [
-  { label: 'Home', href: '#home' },
-  { label: 'Landmark', href: '#landmark' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '/home' },
+  { label: 'Landmark', href: '/home#landmark' },
+  { label: 'Booking', href: '/home#booking' },
+  { label: 'Wishlist', href: '/wishlist' },
 ]
 
 function Header() {
@@ -16,12 +18,12 @@ function Header() {
         <ul className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-100 sm:justify-end">
           {navItems.map((item) => (
             <li key={item.label}>
-              <a
-                href={item.href}
+              <Link
+                to={item.href}
                 className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 transition hover:border-cyan-400/40 hover:bg-cyan-500/10 hover:text-white"
               >
                 {item.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

@@ -6,17 +6,16 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-function About() {
+function Booking() {
   return (
-    <section id="about" className="bg-slate-950 py-24 text-center text-white">
+    <section id="booking" className="bg-slate-950 py-24 text-center text-white">
       <div className="mx-auto max-w-4xl px-6">
         <Card className="overflow-hidden rounded-[1.75rem] border border-slate-800 bg-slate-950/95 shadow-xl">
           <CardContent className="p-10">
             <CardHeader className="space-y-4">
-              <CardTitle>About Us</CardTitle>
+              <CardTitle>Booking</CardTitle>
               <CardDescription>
-                We help travelers find unforgettable journeys through stunning
-                landscapes, local culture, and authentic experiences.
+                View your travel reservations, manage upcoming trips, and start new booking requests for Ethiopian adventures.
               </CardDescription>
             </CardHeader>
           </CardContent>
@@ -26,4 +25,4 @@ function About() {
   )
 }
 
-export default About
+export default Booking
