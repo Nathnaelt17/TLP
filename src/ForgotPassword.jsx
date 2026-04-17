@@ -44,7 +44,7 @@ function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-950">
+    <div className="min-h-screen bg-transparent px-4 py-10 text-white">
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(248,113,113,0.14),_transparent_35%)]" />
         <div className="relative mx-auto w-full max-w-md">

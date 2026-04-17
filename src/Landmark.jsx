@@ -70,12 +70,12 @@ export const landmarks = [
 
 export function LandmarkCard({ landmark, isFavorite, onToggleFavorite, disabled }) {
   return (
-    <Card className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 transition hover:shadow-xl hover:shadow-black/30">
+    <Card className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl transition hover:shadow-xl hover:shadow-black/30">
       <div className="relative">
         <img
           src={landmark.image}
           alt={landmark.name}
-          className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
+          className="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -223,7 +223,7 @@ export default function Landmark() {
   }, [query])
 
   return (
-    <section className="min-h-screen bg-slate-950 py-20 text-white">
+    <section id="landmark" className="min-h-screen scroll-mt-28 bg-transparent py-20 text-white">
       <Toaster />
 
       <div className="mx-auto max-w-7xl px-6">
@@ -243,12 +243,14 @@ export default function Landmark() {
 
         {/* Search */}
         <div className="mb-10 flex justify-center">
+          <div className="w-full max-w-xl">
           <Input
             placeholder="Search by name or location..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="max-w-xl"
+            className="w-full"
           />
+        </div>
         </div>
 
         {/* Grid */}
@@ -265,7 +267,7 @@ export default function Landmark() {
         </div>
 
         {loadingWishlist && userId && (
-          <div className="mt-12 rounded-3xl border border-slate-800 bg-slate-900/80 p-8 text-center text-slate-300 shadow-xl shadow-slate-950/20">
+          <div className="mt-12 rounded-3xl border border-white/10 bg-slate-950/45 p-8 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
             Loading your wishlist...
           </div>
         )}

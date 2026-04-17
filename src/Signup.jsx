@@ -23,9 +23,11 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "./context/AuthContext.jsx"
 
 function Signup() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [name, setName] = useState("")
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
@@ -140,7 +142,7 @@ function Signup() {
         dob,
       }
 
-      localStorage.setItem("user", JSON.stringify(userProfile))
+      login(userProfile)
       navigate("/home")
     } catch (error) {
       setSignupError(error.message || "Signup failed.")
@@ -150,7 +152,7 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-950">
+    <div className="min-h-screen bg-transparent text-white">
       <div className="relative isolate overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_30%)]" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-[radial-gradient(circle_at_bottom_right,_rgba(248,113,113,0.14),_transparent_25%)]" />

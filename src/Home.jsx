@@ -1,15 +1,5 @@
-import Landmark from "./Landmark.jsx"
-import Booking from "./Booking.jsx"
-import Wishlist from "./Wishlist.jsx"
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 
 function Home() {
   return (
@@ -23,7 +13,7 @@ function Home() {
         }}
       >
         <div className="absolute inset-0 bg-slate-950/70" />
-        <div className="relative mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center bg-transparent px-8 py-10 sm:px-10 sm:py-12">
+        <div className="relative mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center bg-transparent px-6 py-10 sm:px-10 sm:py-12">
           <h1 className="mb-5 text-4xl font-bold sm:text-5xl">
             Discover Ethiopia
           </h1>
@@ -34,17 +24,14 @@ function Home() {
           </p>
 
           <Button
-          asChild
+            asChild
             className="rounded-full border border-white/15 bg-white/10 px-8 py-3 text-base font-medium text-slate-100 shadow-sm shadow-slate-950/20 backdrop-blur-sm transition hover:bg-white/15 hover:text-white"
           >
-            <a href="#landmark">Start Exploring</a>
+            <Link to="/landmark">Start Exploring</Link>
           </Button>
         </div>
       </section>
 
-      <Landmark />
-      <Booking />
-      <Wishlist />
     </main>
   )
 }

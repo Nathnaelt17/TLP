@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "./context/AuthContext.jsx"
 
 function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -84,7 +86,7 @@ function Login() {
         dob: profileData?.dob ?? metadata.dob ?? "",
       }
 
-      localStorage.setItem("user", JSON.stringify(userProfile))
+      login(userProfile)
       navigate("/home")
     } catch (loginError) {
       if (loginError?.status !== 400) {
@@ -97,7 +99,7 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-950">
+    <div className="min-h-screen bg-transparent text-white">
       <div className="relative isolate overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.16),_transparent_30%)]" />
         <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top_right,_rgba(248,113,113,0.12),_transparent_28%)]" />
