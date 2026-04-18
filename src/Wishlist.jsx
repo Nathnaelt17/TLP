@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { AnimatePresence, motion as Motion } from "framer-motion"
-import { Briefcase, Heart, Home, LayoutDashboard, Map, Ticket,Pencil} from "lucide-react"
+import { Briefcase, Heart, Home, LayoutDashboard, Map, Ticket, Pencil, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { fetchDestinations } from "@/lib/destinations"
 import { DestinationCard } from "./Landmark.jsx"
@@ -73,7 +73,8 @@ function BookingList({ bookings, onCancelBooking }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [wishlistIds, setWishlistIds] = useState([])
   const [destinations, setDestinations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -226,6 +227,17 @@ export default function Dashboard() {
               <p className="truncate text-sm font-medium">{user?.email}</p>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              logout()
+              navigate("/")
+            }}
+            className="mt-3 w-full justify-start text-slate-300 hover:bg-white/5 hover:text-white"
+          >
+            <LogOut size={18} className="mr-2" />
+            Logout
+          </Button>
         </div>
       </aside>
 

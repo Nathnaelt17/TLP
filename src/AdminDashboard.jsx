@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -18,8 +18,10 @@ import {
   Ticket,
 } from "lucide-react"
 import { isAdminEmail } from "./lib/admin"
-
+import { useAuth } from "./context/AuthContext.jsx"
 export default function AdminDashboard() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [destinations, setDestinations] = useState([])
@@ -32,6 +34,20 @@ export default function AdminDashboard() {
     details: "",
     tag: "",
   })
+
+  const fetchDestinations = async () => {
+    const { data, error } = await supabase
+      .from("destinations")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      toast.error(`Failed to load destinations: ${error.message}`)
+      return
+    }
+
+    setDestinations(data || [])
+  }
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -59,20 +75,6 @@ export default function AdminDashboard() {
 
     return () => subscription.unsubscribe()
   }, [])
-
-  async function fetchDestinations() {
-    const { data, error } = await supabase
-      .from("destinations")
-      .select("*")
-      .order("created_at", { ascending: false })
-
-    if (error) {
-      toast.error(`Failed to load destinations: ${error.message}`)
-      return
-    }
-
-    setDestinations(data || [])
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -137,9 +139,9 @@ export default function AdminDashboard() {
     toast.success("Deleted successfully")
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    window.location.href = "/login"
+  const handleLogout = () => {
+    logout()
+    navigate("/")
   }
 
   if (loading) {

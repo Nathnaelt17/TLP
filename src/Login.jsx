@@ -33,27 +33,27 @@ function Login() {
       let emailToUse = normalizedIdentifier
 
       if (!isEmail) {
-        const lookupColumn = isPhone ? "phone" : "username"
-        const lookupValue = isPhone ? normalizedPhone : loginIdentifier
-        const { data: lookupData, error: lookupError } = await supabase
-          .from("profiles")
-          .select("email")
-          .eq(lookupColumn, lookupValue)
-          .maybeSingle()
+        const { data: lookupData, error: lookupError } = await supabase.rpc(
+          "lookup_user_email",
+          {
+            p_username: isPhone ? null : loginIdentifier,
+            p_phone: isPhone ? normalizedPhone : null,
+          }
+        )
 
         if (lookupError) {
           console.error("Profile lookup error:", lookupError)
           throw lookupError
         }
 
-        if (!lookupData?.email) {
+        if (!lookupData) {
           setError(
             `No account found for that ${isPhone ? "phone number" : "username"}. If this is your first login after signup, use your email address first.`,
           )
           return
         }
 
-        emailToUse = lookupData.email.trim().toLowerCase()
+        emailToUse = lookupData.trim().toLowerCase()
       }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
