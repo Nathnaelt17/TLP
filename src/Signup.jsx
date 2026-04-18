@@ -24,6 +24,30 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "./context/AuthContext.jsx"
+import { ensureProfile } from "./lib/profile"
+
+function getSignupErrorMessage(error) {
+  const rawMessage = error?.message?.trim() || ""
+  const normalizedMessage = rawMessage.toLowerCase()
+
+  if (
+    error?.status === 422 &&
+    (normalizedMessage.includes("already registered") ||
+      normalizedMessage.includes("user already exists"))
+  ) {
+    return "An account with that email already exists. Try signing in or reset your password."
+  }
+
+  if (normalizedMessage.includes("invalid email")) {
+    return "That email address is not accepted by Supabase. Try a different email."
+  }
+
+  if (normalizedMessage.includes("password")) {
+    return rawMessage
+  }
+
+  return rawMessage || "Signup failed."
+}
 
 function Signup() {
   const navigate = useNavigate()
@@ -107,22 +131,6 @@ function Signup() {
         throw error
       }
 
-      if (data?.user) {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: data.user.id,
-          name: normalizedName,
-          username: normalizedUsername,
-          email: normalizedEmail,
-          phone: normalizedPhone,
-          address: normalizedAddress,
-          dob,
-        })
-
-        if (profileError) {
-          throw profileError
-        }
-      }
-
       if (!data.session) {
         localStorage.removeItem("user")
         setSignupError(
@@ -130,6 +138,19 @@ function Signup() {
         )
         setIsLoading(false)
         return
+      }
+
+      const { error: profileError } = await ensureProfile(data.user, {
+        name: normalizedName,
+        username: normalizedUsername,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        address: normalizedAddress,
+        dob,
+      })
+
+      if (profileError) {
+        throw profileError
       }
 
       const userProfile = {
@@ -145,7 +166,13 @@ function Signup() {
       login(userProfile)
       navigate("/home")
     } catch (error) {
-      setSignupError(error.message || "Signup failed.")
+      console.error("Signup error:", {
+        message: error?.message,
+        status: error?.status,
+        code: error?.code,
+        name: error?.name,
+      })
+      setSignupError(getSignupErrorMessage(error))
     } finally {
       setIsLoading(false)
     }

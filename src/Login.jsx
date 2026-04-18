@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "./context/AuthContext.jsx"
+import { ensureProfile } from "./lib/profile"
 
 function Login() {
   const navigate = useNavigate()
@@ -47,7 +48,9 @@ function Login() {
         }
 
         if (!lookupData?.email) {
-          setError(`No account found for that ${isPhone ? "phone number" : "username"}.`)
+          setError(
+            `No account found for that ${isPhone ? "phone number" : "username"}. If this is your first login after signup, use your email address first.`,
+          )
           return
         }
 
@@ -78,14 +81,26 @@ function Login() {
         throw profileError
       }
 
+      let resolvedProfile = profileData
+
+      if (!resolvedProfile) {
+        const { data: syncedProfile, error: syncError } = await ensureProfile(data.user)
+
+        if (syncError) {
+          throw syncError
+        }
+
+        resolvedProfile = syncedProfile
+      }
+
       const userProfile = {
         id: data.user?.id,
-        name: profileData?.name ?? metadata.name ?? "",
-        username: profileData?.username ?? metadata.username ?? "",
-        email: profileData?.email ?? data.user?.email ?? loginIdentifier,
-        phone: profileData?.phone ?? metadata.phone ?? "",
-        address: profileData?.address ?? metadata.address ?? "",
-        dob: profileData?.dob ?? metadata.dob ?? "",
+        name: resolvedProfile?.name ?? metadata.name ?? "",
+        username: resolvedProfile?.username ?? metadata.username ?? "",
+        email: resolvedProfile?.email ?? data.user?.email ?? loginIdentifier,
+        phone: resolvedProfile?.phone ?? metadata.phone ?? "",
+        address: resolvedProfile?.address ?? metadata.address ?? "",
+        dob: resolvedProfile?.dob ?? metadata.dob ?? "",
       }
 
       login(userProfile)
