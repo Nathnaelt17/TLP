@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { motion, AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 
 function Booking() {
   const { user } = useAuth()
@@ -120,9 +120,7 @@ function Booking() {
         setDestinations([])
       } else {
         setDestinations(data || [])
-        if (data && data.length > 0 && !destination) {
-          setDestination(data[0].name)
-        }
+        setDestination((currentDestination) => currentDestination || data?.[0]?.name || "")
       }
       setLoadingDestinations(false)
     }
@@ -133,7 +131,7 @@ function Booking() {
     return (
       <section id="booking" className="min-h-screen scroll-mt-28 bg-transparent py-24 text-white">
         <div className="mx-auto flex min-h-[60vh] max-w-4xl items-center justify-center px-6">
-          <motion.div 
+          <Motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center shadow-xl shadow-slate-950/30 backdrop-blur-xl"
@@ -143,7 +141,7 @@ function Booking() {
             <Link to="/login" className="mt-8 inline-flex rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-400">
               Log in
             </Link>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
     )
@@ -153,7 +151,7 @@ function Booking() {
     <section id="booking" className="scroll-mt-28 bg-transparent py-24 text-white">
       <Toaster />
       <div className="mx-auto max-w-4xl px-6">
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -170,7 +168,7 @@ function Booking() {
               <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
                 <AnimatePresence>
                   {errors.length > 0 && (
-                    <motion.div 
+                    <Motion.div 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
@@ -181,7 +179,7 @@ function Booking() {
                           <li key={index}>{error}</li>
                         ))}
                       </ul>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </AnimatePresence>
 
@@ -254,7 +252,7 @@ function Booking() {
 
               <AnimatePresence>
                 {submitted && bookingData && (
-                  <motion.div 
+                  <Motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-10 rounded-[2rem] border border-cyan-500/20 bg-cyan-500/10 p-6 text-slate-50"
@@ -274,12 +272,12 @@ function Booking() {
                         </div>
                       ))}
                     </div>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
             </CardContent>
           </Card>
-        </motion.div>
+        </Motion.div>
       </div>
     </section>
   )

@@ -20,20 +20,20 @@ export default function AdminDashboard() {
     tag: "",
   })
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data?.user || null)
-    }
-
-    getUser()
-    fetchDestinations()
-  }, [])
-
-  const fetchDestinations = async () => {
+  async function fetchDestinations() {
     const { data } = await supabase.from("destinations").select("*")
     setDestinations(data || [])
   }
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data?.user || null)
+      await fetchDestinations()
+    }
+
+    loadDashboard()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
     fetchDestinations()
   }
 
-  // 🔐 PROTECTION
+  
   if (!user) {
     return <p className="text-white p-10">Please log in.</p>
   }
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen text-white p-10 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
-      {/* FORM */}
+      
       <form onSubmit={handleSubmit} className="space-y-4 mb-10">
         <Input placeholder="Name" value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -107,7 +107,6 @@ export default function AdminDashboard() {
         <Button type="submit">Add Destination</Button>
       </form>
 
-      {/* LIST */}
       <div className="space-y-4">
         {destinations.map((d) => (
           <div

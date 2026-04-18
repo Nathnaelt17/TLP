@@ -1,23 +1,24 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
-import { supabase } from "./supabase-client"
-import { DestinationCard } from "./Landmark.jsx"
-import { useAuth } from "./context/AuthContext.jsx"
+import { AnimatePresence, motion as Motion } from "framer-motion"
+import { Briefcase, Heart, Home, LayoutDashboard, Map, Ticket} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { fetchDestinations } from "@/lib/destinations"
-import { motion, AnimatePresence } from "framer-motion"
+import { DestinationCard } from "./Landmark.jsx"
+import { supabase } from "./supabase-client"
+import { useAuth } from "./context/AuthContext.jsx"
 
 function BookingList({ bookings, onCancelBooking }) {
   if (bookings.length === 0) {
     return (
-      <motion.p 
+      <Motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="mt-4 text-slate-300"
+        className="mt-4 text-slate-400 italic"
       >
-        No booked trips yet. Complete the booking form to create your first booking.
-      </motion.p>
+        No booked trips yet.
+      </Motion.p>
     )
   }
 
@@ -25,38 +26,46 @@ function BookingList({ bookings, onCancelBooking }) {
     <div className="mt-6 space-y-4">
       <AnimatePresence mode="popLayout">
         {bookings.map((trip) => (
-          <motion.div 
+          <Motion.div
             key={trip.id ?? `${trip.destination}-${trip.checkIn}`}
             layout
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 text-slate-200"
+            className="rounded-2xl border border-white/5 bg-slate-900/50 p-5 text-slate-200"
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.25em] text-cyan-300">Destination</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">
+                  Destination
+                </p>
                 <p className="mt-1 text-lg font-semibold text-white">{trip.destination}</p>
               </div>
-              <div className="text-sm text-slate-400">
-                <p>{trip.checkIn} → {trip.checkOut}</p>
+              <div className="text-right text-sm text-slate-400">
+                <p className="font-mono">
+                  {trip.checkIn} - {trip.checkOut}
+                </p>
                 <p>{trip.guests} guest{trip.guests === 1 ? "" : "s"}</p>
               </div>
             </div>
-            {trip.notes && <p className="mt-4 text-slate-300">Notes: {trip.notes}</p>}
-            {onCancelBooking && trip.id && (
+            {trip.notes ? (
+              <p className="mt-4 rounded-lg bg-black/20 p-3 text-sm text-slate-400">
+                Note: {trip.notes}
+              </p>
+            ) : null}
+            {onCancelBooking && trip.id ? (
               <div className="mt-5 flex justify-end">
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
-                  className="border-cyan-400 bg-slate-900 text-cyan-300 shadow-lg shadow-cyan-500/10 transition duration-200 hover:bg-cyan-500 hover:text-white hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-cyan-300/40"
+                  className="text-red-400 hover:bg-red-400/10 hover:text-red-300"
                   onClick={() => onCancelBooking(trip.id)}
                 >
-                  Cancel booking
+                  Cancel Trip
                 </Button>
               </div>
-            )}
-          </motion.div>
+            ) : null}
+          </Motion.div>
         ))}
       </AnimatePresence>
     </div>
@@ -68,7 +77,6 @@ export default function Dashboard() {
   const [wishlistIds, setWishlistIds] = useState([])
   const [destinations, setDestinations] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadingDestinations, setLoadingDestinations] = useState(true)
   const [bookings, setBookings] = useState([])
 
   const fetchWishlist = async (userUuid) => {
@@ -79,71 +87,50 @@ export default function Dashboard() {
       .eq("user_id", userUuid)
 
     if (error) {
-      toast.error("Unable to load your dashboard.")
+      toast.error("Unable to load wishlist.")
       setWishlistIds([])
-      setLoading(false)
-      return
+    } else {
+      setWishlistIds((data || []).map((item) => item.landmark_id))
     }
-    setWishlistIds(data.map((item) => item.landmark_id))
+
     setLoading(false)
   }
 
-  const removeFromWishlist = async (landmarkId) => {
+  const toggleWishlist = async (landmarkId) => {
+    if (!user?.id) return
+
+    if (wishlistIds.includes(landmarkId)) {
+      const { error } = await supabase
+        .from("wishlist")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("landmark_id", landmarkId)
+
+      if (!error) {
+        setWishlistIds((prev) => prev.filter((id) => id !== landmarkId))
+      }
+      return
+    }
+
     const { error } = await supabase
       .from("wishlist")
-      .delete()
-      .eq("user_id", user?.id)
-      .eq("landmark_id", landmarkId)
+      .insert({ user_id: user.id, landmark_id: landmarkId })
 
-    if (error) {
-      toast.error("Could not remove this item from your dashboard.")
-      return
-    }
-    setWishlistIds((current) => current.filter((id) => id !== landmarkId))
-    toast.success("Removed from your dashboard.")
-  }
-
-  const addToWishlist = async (landmarkId) => {
-    const { error } = await supabase.from("wishlist").insert({
-      user_id: user?.id,
-      landmark_id: landmarkId,
-    })
-    if (error) {
-      toast.error("Could not add this item to your dashboard.")
-      return
-    }
-    setWishlistIds((current) => [...current, landmarkId])
-    toast.success("Added to your dashboard.")
-  }
-
-  const toggleWishlist = async (landmarkId) => {
-    if (!user?.id) {
-      toast("Please log in to access your dashboard.")
-      return
-    }
-    if (wishlistIds.includes(landmarkId)) {
-      await removeFromWishlist(landmarkId)
-    } else {
-      await addToWishlist(landmarkId)
+    if (!error) {
+      setWishlistIds((prev) => [...prev, landmarkId])
     }
   }
-
-  const savedDestinations = useMemo(
-    () => destinations.filter((destination) => wishlistIds.includes(destination.id)),
-    [wishlistIds, destinations]
-  )
 
   const fetchDestinationsFromDb = async () => {
-    setLoadingDestinations(true)
-    const { data, error } = await fetchDestinations()
+    const { data, error, formattedError } = await fetchDestinations()
+
     if (error) {
-      toast.error("Unable to load destination details.")
+      toast.error(formattedError || error.message || "Unable to load destinations.")
       setDestinations([])
-      setLoadingDestinations(false)
       return
     }
+
     setDestinations(data || [])
-    setLoadingDestinations(false)
   }
 
   const fetchBookings = async (userUuid) => {
@@ -154,15 +141,18 @@ export default function Dashboard() {
       .order("created_at", { ascending: false })
 
     if (error) {
-      toast.error("Unable to load your booked trips.")
+      toast.error("Unable to load bookings.")
       setBookings([])
       return
     }
-    setBookings((data || []).map((trip) => ({
-      ...trip,
-      checkIn: trip.check_in,
-      checkOut: trip.check_out,
-    })))
+
+    setBookings(
+      (data || []).map((trip) => ({
+        ...trip,
+        checkIn: trip.check_in,
+        checkOut: trip.check_out,
+      }))
+    )
   }
 
   const handleCancelBooking = async (bookingId) => {
@@ -173,104 +163,154 @@ export default function Dashboard() {
       .eq("user_id", user?.id)
 
     if (error) {
-      toast.error("Could not cancel that booking.")
+      toast.error("Unable to cancel booking.")
       return
     }
+
     setBookings((current) => current.filter((booking) => booking.id !== bookingId))
-    toast.success("Booking canceled.")
+    toast.success("Booking cancelled.")
   }
 
   useEffect(() => {
-    const loadWishlist = async () => {
-      if (!user?.id) {
+    const loadData = async () => {
+      if (user?.id) {
+        await Promise.all([
+          fetchWishlist(user.id),
+          fetchBookings(user.id),
+          fetchDestinationsFromDb(),
+        ])
+      } else {
+        setLoading(false)
         setWishlistIds([])
         setBookings([])
-        setLoading(false)
         await fetchDestinationsFromDb()
-        return
       }
-      await fetchWishlist(user.id)
-      await fetchBookings(user.id)
-      await fetchDestinationsFromDb()
     }
-    loadWishlist()
+
+    loadData()
   }, [user])
 
+  const savedDestinations = useMemo(
+    () => destinations.filter((destination) => wishlistIds.includes(destination.id)),
+    [wishlistIds, destinations]
+  )
+
   return (
-    <section id="dashboard" className="min-h-screen bg-transparent py-20 text-white">
-      <Toaster />
+    <div className="flex min-h-screen text-white">
+      <Toaster position="bottom-right" />
 
-      <div className="mx-auto max-w-7xl px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12 text-center"
-        >
-          <p className="text-sm uppercase tracking-widest text-cyan-400">Dashboard</p>
-          <h1 className="mt-2 text-4xl font-bold sm:text-5xl">Saved Destinations</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-400">
-            These are the destinations you&apos;ve saved. Remove items or visit the Destinations page to add more.
-          </p>
-        </motion.div>
+      <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-white/5 bg-slate-900/40 backdrop-blur-xl lg:flex">
+        <div className="p-8">
+          <Link to="/" className="text-2xl font-bold tracking-tighter text-white">
+           <h1 className="text-2xl font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm">
+          Tourism
+        </h1>
+          </Link>
+        </div>
 
-        {!user && !loading ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl"
-          >
-            <p className="text-lg text-white">Please log in to view your dashboard.</p>
-            <Link to="/login" className="mt-4 inline-flex rounded-full border border-cyan-400/40 bg-cyan-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-400">
-              Log In
-            </Link>
-          </motion.div>
-        ) : loading || loadingDestinations ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl"
-          >
-            <p className="text-lg">Loading your dashboard...</p>
-          </motion.div>
-        ) : (
-          <div className="space-y-12">
-            <motion.div layout className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              <AnimatePresence mode="popLayout">
-                {savedDestinations.map((destination) => (
-                  <DestinationCard
-                    key={destination.id}
-                    landmark={destination}
-                    isFavorite={true}
-                    onToggleFavorite={() => toggleWishlist(destination.id)}
-                  />
-                ))}
-              </AnimatePresence>
-            </motion.div>
+        <nav className="flex flex-1 flex-col gap-2 px-4">
+          <SidebarLink to="/" icon={<Home size={18} />} label="Home" />
+          <SidebarLink to="/destinations" icon={<Map size={18} />} label="Destinations" />
+          <SidebarLink to="/bookings" icon={<Ticket size={18} />} label="Bookings" />
+          <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+        </nav>
 
-            {savedDestinations.length === 0 && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl backdrop-blur-xl"
-              >
-                <p className="text-lg text-white">Your dashboard is empty.</p>
-                <p className="mt-2 text-sm text-slate-400">Head back to the Destinations page to save your favorite destinations.</p>
-              </motion.div>
-            )}
-
-            <motion.div 
-              layout
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-8 shadow-xl shadow-slate-950/20 backdrop-blur-xl"
-            >
-              <h2 className="text-2xl font-semibold text-white">Booked Trips</h2>
-              <p className="mt-2 text-slate-400">Your upcoming bookings are shown here for quick reference.</p>
-              <BookingList bookings={bookings} onCancelBooking={handleCancelBooking} />
-            </motion.div>
+        <div className="mt-auto border-t border-white/5 p-4">
+          <div className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 font-bold text-cyan-400">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-xs text-slate-500">Account</p>
+              <p className="truncate text-sm font-medium">{user?.email}</p>
+            </div>
           </div>
-        )}
-      </div>
-    </section>
+        </div>
+      </aside>
+
+      <main className="flex-1 lg:ml-64">
+        <div className="mx-auto max-w-6xl p-6 lg:p-12">
+          {!user && !loading ? (
+            <div className="flex h-[80vh] items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold">Access Denied</h2>
+                <p className="mt-2 text-slate-400">
+                  Please log in to view your private dashboard.
+                </p>
+                <Link
+                  to="/login"
+                  className="mt-6 inline-block rounded-full bg-cyan-500 px-8 py-3 font-semibold"
+                >
+                  Log In
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <header className="mb-10">
+                <h1 className="text-4xl font-bold tracking-tight">Your Dashboard</h1>
+                <p className="mt-2 text-slate-400">
+                  Manage your wishlist and upcoming reservations.
+                </p>
+              </header>
+
+              <div className="grid gap-10 lg:grid-cols-3">
+                <div className="space-y-6 lg:col-span-2">
+                  <div className="flex items-center gap-2 text-cyan-400">
+                    <Heart size={20} />
+                    <h2 className="text-xl font-semibold text-white">Saved Destinations</h2>
+                  </div>
+
+                  {savedDestinations.length === 0 ? (
+                    <div className="rounded-3xl border border-dashed border-white/10 p-12 text-center text-slate-500">
+                      No saved items yet.
+                    </div>
+                  ) : (
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <AnimatePresence>
+                        {savedDestinations.map((destination) => (
+                          <DestinationCard
+                            key={destination.id}
+                            landmark={destination}
+                            isFavorite
+                            onToggleFavorite={() => toggleWishlist(destination.id)}
+                          />
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 text-cyan-400">
+                    <Briefcase size={20} />
+                    <h2 className="text-xl font-semibold text-white">Upcoming Trips</h2>
+                  </div>
+                  <div className="rounded-3xl border border-white/5 bg-slate-900/30 p-6 backdrop-blur-sm">
+                    <BookingList bookings={bookings} onCancelBooking={handleCancelBooking} />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function SidebarLink({ to, icon, label, active = false }) {
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all ${
+        active
+          ? "bg-cyan-500/10 font-medium text-cyan-400"
+          : "text-slate-400 hover:bg-white/5 hover:text-white"
+      }`}
+    >
+      {icon}
+      {label}
+    </Link>
   )
 }

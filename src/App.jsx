@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import Header from "./Header.jsx"
 import Login from "./Login.jsx"
 import Signup from "./Signup.jsx"
@@ -13,7 +13,11 @@ import ProtectedRoute from "./ProtectedRoute.jsx"
 import AdminDashboard from "./AdminDashboard.jsx"
 
 function App() {
+  const location = useLocation()
   const backgroundImage = "url('https://resources.travellocal.com/wp/uploads/2023/09/10132016/South-Africa-landscape-un-scaled.jpg')"
+  const isDashboardRoute = location.pathname === "/dashboard"
+  const isHomeRoute = location.pathname === "/" || location.pathname === "/home"
+  const contentClassName = isDashboardRoute || isHomeRoute ? "" : "pt-28"
 
   return (
     <div
@@ -21,8 +25,8 @@ function App() {
       style={{ backgroundImage }}
     >
       <div className="absolute inset-0 bg-slate-950/70" />
-      <div className="relative z-10 pt-28">
-        <Header />
+      <div className={`relative z-10 ${contentClassName}`}>
+        {!isDashboardRoute ? <Header /> : null}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

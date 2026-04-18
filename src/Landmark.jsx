@@ -6,7 +6,7 @@ import { fetchDestinations } from "@/lib/destinations"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart, HeartOff, Search } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 
 export function DestinationCard({
   landmark,
@@ -16,7 +16,7 @@ export function DestinationCard({
   onCardClick,
 }) {
   return (
-    <motion.div
+    <Motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export function DestinationCard({
                 : "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md"
             } ${disabled && !isFavorite ? "cursor-not-allowed opacity-70" : ""}`}
           >
-            <motion.div
+            <Motion.div
               animate={{ scale: isFavorite ? [1, 1.3, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >
@@ -55,7 +55,7 @@ export function DestinationCard({
               ) : (
                 <HeartOff className="h-4 w-4" />
               )}
-            </motion.div>
+            </Motion.div>
           </button>
         </div>
 
@@ -67,7 +67,7 @@ export function DestinationCard({
           </p>
         </CardContent>
       </Card>
-    </motion.div>
+    </Motion.div>
   )
 }
 
@@ -78,11 +78,9 @@ export default function Destinations() {
   const [userId, setUserId] = useState(null)
   const [loadingDestinations, setLoadingDestinations] = useState(true)
   const [fetchError, setFetchError] = useState(null)
-  const [loadingWishlist, setLoadingWishlist] = useState(true)
   const navigate = useNavigate()
 
   const fetchWishlist = async (userUuid) => {
-    setLoadingWishlist(true)
     const { data, error } = await supabase
       .from("wishlist")
       .select("landmark_id")
@@ -91,12 +89,10 @@ export default function Destinations() {
     if (error) {
       toast.error("Unable to load saved destinations.")
       setWishlistIds([])
-      setLoadingWishlist(false)
       return
     }
 
     setWishlistIds(data.map((item) => item.landmark_id))
-    setLoadingWishlist(false)
   }
 
   const loadDestinations = async () => {
@@ -132,7 +128,6 @@ export default function Destinations() {
         await fetchWishlist(userId)
       } else {
         setWishlistIds([])
-        setLoadingWishlist(false)
       }
     }
     loadUser()
@@ -181,15 +176,15 @@ export default function Destinations() {
     <div className="min-h-screen text-white p-10">
       <Toaster />
 
-      <motion.h1 
+      <Motion.h1 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         className="text-4xl font-bold mb-6"
       >
         Explore Destinations
-      </motion.h1>
+      </Motion.h1>
 
-      <motion.div 
+      <Motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative mb-8 max-w-2xl"
@@ -204,11 +199,11 @@ export default function Destinations() {
           onChange={(e) => setQuery(e.target.value)}
           className="w-full rounded-[2rem] border border-white/15 bg-slate-900/90 px-14 py-4 text-base text-slate-100 shadow-xl shadow-black/20 outline-none transition duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
         />
-      </motion.div>
+      </Motion.div>
 
       <AnimatePresence mode="wait">
         {loadingDestinations ? (
-          <motion.div 
+          <Motion.div 
             key="loading"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -216,9 +211,9 @@ export default function Destinations() {
             className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center text-slate-300 shadow-xl backdrop-blur-xl"
           >
             Loading destinations...
-          </motion.div>
+          </Motion.div>
         ) : fetchError ? (
-          <motion.div 
+          <Motion.div 
             key="error"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -226,9 +221,9 @@ export default function Destinations() {
           >
             <p className="text-xl font-semibold text-white">Unable to load destinations</p>
             <p className="mt-3 text-slate-400">{fetchError}</p>
-          </motion.div>
+          </Motion.div>
         ) : (
-          <motion.div 
+          <Motion.div 
             key="grid"
             layout
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -245,7 +240,7 @@ export default function Destinations() {
                 />
               ))}
             </AnimatePresence>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
 
