@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { supabase } from "./supabase-client"
-import { DestinationCard, destinations } from "./Landmark.jsx"
+import { DestinationCard } from "./Landmark.jsx"
 import { useAuth } from "./context/AuthContext.jsx"
 import { Button } from "@/components/ui/button"
+import { fetchDestinations } from "@/lib/destinations"
 
 function BookingList({ bookings, onCancelBooking }) {
   if (bookings.length === 0) {
@@ -53,7 +54,9 @@ function BookingList({ bookings, onCancelBooking }) {
 export default function Dashboard() {
   const { user } = useAuth()
   const [wishlistIds, setWishlistIds] = useState([])
+  const [destinations, setDestinations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingDestinations, setLoadingDestinations] = useState(true)
 
   const fetchWishlist = async (userUuid) => {
     setLoading(true)
@@ -119,10 +122,25 @@ export default function Dashboard() {
 
   const savedDestinations = useMemo(
     () => destinations.filter((destination) => wishlistIds.includes(destination.id)),
-    [wishlistIds]
+    [wishlistIds, destinations]
   )
 
   const [bookings, setBookings] = useState([])
+  
+  const fetchDestinationsFromDb = async () => {
+    setLoadingDestinations(true)
+    const { data, error } = await fetchDestinations()
+
+    if (error) {
+      toast.error("Unable to load destination details.")
+      setDestinations([])
+      setLoadingDestinations(false)
+      return
+    }
+
+    setDestinations(data || [])
+    setLoadingDestinations(false)
+  }
 
   const fetchBookings = async (userUuid) => {
     const { data, error } = await supabase
@@ -168,11 +186,13 @@ export default function Dashboard() {
         setWishlistIds([])
         setBookings([])
         setLoading(false)
+        await fetchDestinationsFromDb()
         return
       }
 
       await fetchWishlist(user.id)
       await fetchBookings(user.id)
+      await fetchDestinationsFromDb()
     }
 
     loadWishlist()
@@ -201,7 +221,7 @@ export default function Dashboard() {
               Log In
             </Link>
           </div>
-        ) : loading ? (
+        ) : loading || loadingDestinations ? (
           <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950/45 p-10 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
             <p className="text-lg">Loading your dashboard...</p>
           </div>

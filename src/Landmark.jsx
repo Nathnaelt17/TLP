@@ -2,86 +2,10 @@ import { useEffect, useMemo, useState } from "react"
 import { toast, Toaster } from "sonner"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
+import { fetchDestinations } from "@/lib/destinations"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Heart, HeartOff, Search } from "lucide-react"
-
-export const destinations = [
-  {
-    id: 1,
-    name: "Lalibela Rock-Hewn Churches",
-    location: "Amhara Region, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/0/0f/Bete_Giyorgis_Lalibela.jpg",
-    description:
-      "Famous 12th-century rock-carved churches and UNESCO World Heritage Site.",
-    details:
-      "Lalibela is one of the holiest cities in Ethiopia, known for its 11 medieval monolithic churches carved directly into rock. Built during the Zagwe dynasty, it remains an active pilgrimage site for Ethiopian Orthodox Christians.",
-    highlights: ["UNESCO World Heritage Site", "11 rock-hewn churches"],
-    tag: "Heritage",
-  },
-  {
-    id: 2,
-    name: "Simien Mountains National Park",
-    location: "Amhara Region, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/6/6b/Simiens_Cliffs.jpg",
-    description:
-      "Dramatic cliffs and rare wildlife in Ethiopia’s highest peaks.",
-    details:
-      "The Simien Mountains feature dramatic escarpments, deep valleys, and rare species such as the Ethiopian wolf and Gelada baboon.",
-    highlights: ["Ethiopian wolf", "High-altitude trekking"],
-    tag: "Adventure",
-  },
-  {
-    id: 3,
-    name: "Danakil Depression",
-    location: "Afar Region, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/3/3f/Dallol_Ethiopia.jpg",
-    description: "One of the hottest and most extreme places on Earth.",
-    details:
-      "The Danakil Depression contains lava lakes, salt flats, and colorful acid springs in one of the most hostile environments on Earth.",
-    highlights: ["Erta Ale volcano", "Dallol hot springs"],
-    tag: "Extreme",
-  },
-  {
-    id: 4,
-    name: "Blue Nile Falls",
-    location: "Bahir Dar, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/5/5c/Blue_Nile_Falls.jpg",
-    description: "Powerful waterfall on the Blue Nile River.",
-    details:
-      "Blue Nile Falls (Tis Issat) is a dramatic waterfall that becomes especially powerful during the rainy season.",
-    highlights: ["Lake Tana nearby", "Seasonal waterfall"],
-    tag: "Nature",
-  },
-  {
-    id: 5,
-    name: "Harar Jugol",
-    location: "Harari Region, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/0/0a/Harar_walls.jpg",
-    description: "Ancient walled city with deep cultural heritage.",
-    details:
-      "Harar is one of the oldest Islamic cities in Africa, known for its narrow alleyways, markets, and hyena feeding tradition.",
-    highlights: ["UNESCO site", "Old walled city"],
-    tag: "Culture",
-  },
-  {
-    id: 6,
-    name: "Bale Mountains",
-    location: "Oromia Region, Ethiopia",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/1/1f/Bale_Mountains.jpg",
-    description: "High-altitude park with unique wildlife.",
-    details:
-      "The Bale Mountains offer afro-alpine scenery and are home to the endangered Ethiopian wolf.",
-    highlights: ["Sanetti Plateau", "Wildlife trekking"],
-    tag: "Wildlife",
-  },
-]
 
 export function DestinationCard({
   landmark,
@@ -107,8 +31,12 @@ export function DestinationCard({
             e.stopPropagation()
             if (!disabled) onToggleFavorite()
           }}
-          className={`absolute right-3 top-3 rounded-full p-2 ${
-            isFavorite ? "bg-red-500 text-white" : "bg-white/20 text-white"
+          className={`absolute right-3 top-3 rounded-full p-2 transition ${
+            disabled
+              ? "cursor-not-allowed bg-slate-600/50 text-slate-300"
+              : isFavorite
+              ? "bg-red-100 text-red-600 shadow-lg shadow-red-500/20 hover:bg-red-200"
+              : "bg-white/20 text-white hover:bg-white/30"
           }`}
         >
           {isFavorite ? (
@@ -132,14 +60,67 @@ export function DestinationCard({
 
 export default function Destinations() {
   const [query, setQuery] = useState("")
+  const [destinations, setDestinations] = useState([])
   const [wishlistIds, setWishlistIds] = useState([])
   const [userId, setUserId] = useState(null)
+  const [loadingDestinations, setLoadingDestinations] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
+  const [loadingWishlist, setLoadingWishlist] = useState(true)
   const navigate = useNavigate()
+
+  const fetchWishlist = async (userUuid) => {
+    setLoadingWishlist(true)
+    const { data, error } = await supabase
+      .from("wishlist")
+      .select("landmark_id")
+      .eq("user_id", userUuid)
+
+    if (error) {
+      toast.error("Unable to load saved destinations.")
+      setWishlistIds([])
+      setLoadingWishlist(false)
+      return
+    }
+
+    setWishlistIds(data.map((item) => item.landmark_id))
+    setLoadingWishlist(false)
+  }
+
+  const loadDestinations = async () => {
+    setLoadingDestinations(true)
+    setFetchError(null)
+
+    const response = await fetchDestinations()
+    const { data, error, formattedError } = response
+
+    if (error) {
+      const message = formattedError || error.message || "Unable to load destinations."
+      console.error("Destination fetch error:", response)
+      toast.error(message)
+      setFetchError(message)
+      setDestinations([])
+      setLoadingDestinations(false)
+      return
+    }
+
+    setDestinations(data || [])
+    setLoadingDestinations(false)
+  }
 
   useEffect(() => {
     const loadUser = async () => {
+      await loadDestinations()
+
       const { data } = await supabase.auth.getUser()
-      setUserId(data?.user?.id || null)
+      const userId = data?.user?.id || null
+      setUserId(userId)
+
+      if (userId) {
+        await fetchWishlist(userId)
+      } else {
+        setWishlistIds([])
+        setLoadingWishlist(false)
+      }
     }
     loadUser()
   }, [])
@@ -148,8 +129,29 @@ export default function Destinations() {
     if (!userId) return toast("Please log in first")
 
     if (wishlistIds.includes(id)) {
+      const { error } = await supabase
+        .from("wishlist")
+        .delete()
+        .eq("user_id", userId)
+        .eq("landmark_id", id)
+
+      if (error) {
+        toast.error("Could not remove saved destination.")
+        return
+      }
+
       setWishlistIds((p) => p.filter((x) => x !== id))
     } else {
+      const { error } = await supabase.from("wishlist").insert({
+        user_id: userId,
+        landmark_id: id,
+      })
+
+      if (error) {
+        toast.error("Could not save destination.")
+        return
+      }
+
       setWishlistIds((p) => [...p, id])
     }
   }
@@ -160,7 +162,7 @@ export default function Destinations() {
         d.name.toLowerCase().includes(query.toLowerCase()) ||
         d.location.toLowerCase().includes(query.toLowerCase())
     )
-  }, [query])
+  }, [destinations, query])
 
   return (
     <div className="min-h-screen text-white p-10">
@@ -181,18 +183,44 @@ export default function Destinations() {
         />
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {filtered.map((d) => (
-          <DestinationCard
-            key={d.id}
-            landmark={d}
-            isFavorite={wishlistIds.includes(d.id)}
-            onToggleFavorite={() => toggleWishlist(d.id)}
-            disabled={!userId}
-            onCardClick={() => navigate(`/destination/${d.id}`)}
-          />
-        ))}
-      </div>
+      {loadingDestinations ? (
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
+          Loading destinations...
+        </div>
+      ) : fetchError ? (
+        <div className="rounded-[2rem] border border-red-500/20 bg-slate-950/45 p-12 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
+          <p className="text-xl font-semibold text-white">Unable to load destinations</p>
+          <p className="mt-3 text-slate-400">{fetchError}</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Check your Supabase table, policies, and network configuration.
+          </p>
+        </div>
+      ) : destinations.length === 0 ? (
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
+          <p className="text-xl font-semibold text-white">No destinations found.</p>
+          <p className="mt-3 text-slate-400">
+            Your Supabase `destinations` table is empty or unreadable. Add rows there and refresh the page.
+          </p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-12 text-center text-slate-300 shadow-xl shadow-slate-950/20 backdrop-blur-xl">
+          <p className="text-xl font-semibold text-white">No destinations match your search.</p>
+          <p className="mt-3 text-slate-400">Try removing the search text or checking back later.</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-3 gap-6">
+          {filtered.map((d) => (
+            <DestinationCard
+              key={d.id}
+              landmark={d}
+              isFavorite={wishlistIds.includes(d.id)}
+              onToggleFavorite={() => toggleWishlist(d.id)}
+              disabled={!userId}
+              onCardClick={() => navigate(`/destination/${d.id}`)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { useAuth } from "./context/AuthContext.jsx"
 import { supabase } from "./supabase-client"
-import { destinations } from "./Landmark.jsx"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,6 +24,8 @@ function Booking() {
   const [submitted, setSubmitted] = useState(false)
   const [bookingData, setBookingData] = useState(null)
   const [errors, setErrors] = useState([])
+  const [destinations, setDestinations] = useState([])
+  const [loadingDestinations, setLoadingDestinations] = useState(true)
 
   const validate = () => {
     const validationErrors = []
@@ -106,9 +107,27 @@ function Booking() {
   }
 
   useEffect(() => {
-    if (destinations.length > 0 && !destination) {
-      setDestination(destinations[0].name)
+    const loadDestinations = async () => {
+      setLoadingDestinations(true)
+      const { data, error } = await supabase
+        .from("destinations")
+        .select("*")
+        .order("name", { ascending: true })
+
+      if (error) {
+        toast.error("Unable to load destinations.")
+        setDestinations([])
+      } else {
+        setDestinations(data || [])
+        if (data && data.length > 0 && !destination) {
+          setDestination(data[0].name)
+        }
+      }
+
+      setLoadingDestinations(false)
     }
+
+    loadDestinations()
   }, [])
 
   if (!user) {
@@ -163,13 +182,20 @@ function Booking() {
                     id="destination"
                     value={destination}
                     onChange={(event) => setDestination(event.target.value)}
-                    className="w-full rounded-3xl border border-white/10 bg-slate-950/45 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-xl"
+                    disabled={loadingDestinations || destinations.length === 0}
+                    className="w-full rounded-3xl border border-white/10 bg-slate-950/45 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-xl disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {destinations.map((item) => (
-                      <option key={item.id} value={item.name} className="bg-slate-950 text-white">
-                        {item.name}
-                      </option>
-                    ))}
+                    {loadingDestinations ? (
+                      <option>Loading destinations...</option>
+                    ) : destinations.length === 0 ? (
+                      <option>No destinations available</option>
+                    ) : (
+                      destinations.map((item) => (
+                        <option key={item.id} value={item.name} className="bg-slate-950 text-white">
+                          {item.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
