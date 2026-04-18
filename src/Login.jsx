@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "./context/AuthContext.jsx"
 import { ensureProfile } from "./lib/profile"
+import { isAdminEmail } from "./lib/admin"
 
 function Login() {
   const navigate = useNavigate()
@@ -22,8 +23,6 @@ function Login() {
     e.preventDefault()
     setError("")
     setIsLoading(true)
-
-    const ADMIN_EMAIL = "Nathnaeltm17@gmail.com"
 
     try {
       const loginIdentifier = identifier.trim()
@@ -104,7 +103,7 @@ function Login() {
       }
 
       login(userProfile)
-      navigate("/home")
+      navigate(isAdminEmail(userProfile.email) ? "/admin" : "/home")
     } catch (loginError) {
       if (loginError?.status !== 400) {
         console.error("Login error:", loginError)

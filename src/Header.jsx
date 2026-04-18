@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { useAuth } from "./context/AuthContext.jsx"
+import { isAdminEmail } from "./lib/admin"
 
 function Header() {
   const { user, logout } = useAuth()
@@ -28,13 +29,15 @@ function Header() {
     }
   }, [menuOpen])
 
-  // Dashboard is now included by default for everyone
   const navItems = [
     { label: "Home", href: "/home" },
     { label: "Destinations", href: "/destinations" },
     { label: "Booking", href: "/booking" },
-    { label: "Dashboard", href: "/dashboard" }, 
+    { label: "Dashboard", href: "/dashboard" },
   ]
+  const visibleNavItems = isAdminEmail(user?.email)
+    ? [...navItems, { label: "Admin", href: "/admin" }]
+    : navItems
 
   const profileInitial = user?.username?.[0]?.toUpperCase() || user?.name?.[0]?.toUpperCase() || "U"
 
@@ -47,7 +50,7 @@ function Header() {
 
         <div className="flex w-full flex-col items-center gap-3 text-sm font-medium text-slate-100 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
           <ul className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:items-center">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <li key={item.label}>
                 <Link
                   to={item.href}
