@@ -15,6 +15,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  Ticket,
 } from "lucide-react"
 import { isAdminEmail } from "./lib/admin"
 
@@ -169,15 +170,15 @@ export default function AdminDashboard() {
     )
   }
 
-  // Common Input Styles to match Booking component
   const inputStyles = "border-white/10 bg-slate-950/45 text-slate-100 backdrop-blur-xl transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 rounded-2xl"
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-white">
-      {/* Sidebar */}
+    
+    <div className="flex min-h-screen bg-transparent text-white">
+      {/* Sidebar - Consistent with User Dashboard */}
       <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-white/5 bg-slate-900/40 backdrop-blur-xl lg:flex">
         <div className="p-8">
-          <Link to="/home" className="text-2xl font-bold tracking-tighter text-white">
+          <Link to="/" className="text-2xl font-bold tracking-tighter text-white">
             <h1 className="text-2xl font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm">
               Tourism
             </h1>
@@ -185,16 +186,22 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-2 px-4">
-          <SidebarLink to="/home" icon={<Home size={18} />} label="Home" />
+          <SidebarLink to="/" icon={<Home size={18} />} label="Home" />
           <SidebarLink to="/destinations" icon={<Map size={18} />} label="Destinations" />
+          <SidebarLink to="/booking" icon={<Ticket size={18} />} label="Bookings" />
           <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
           <SidebarLink to="/admin" icon={<Pencil size={18} />} label="Admin" active />
         </nav>
 
         <div className="mt-auto border-t border-white/5 p-4">
-          <div className="rounded-xl bg-white/5 px-4 py-3">
-            <p className="text-xs text-slate-500">Admin account</p>
-            <p className="mt-1 truncate text-sm font-medium">{user.email}</p>
+          <div className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 font-bold text-cyan-400">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-xs text-slate-500">Admin Account</p>
+              <p className="truncate text-sm font-medium">{user.email}</p>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -207,98 +214,102 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="flex-1 lg:ml-64">
         <div className="mx-auto max-w-6xl p-6 lg:p-12">
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Admin Dashboard</h1>
-              <p className="mt-2 text-slate-400">
-                Manage destination content and keep the catalog up to date.
-              </p>
-            </div>
-            {editingId && (
-              <Button variant="secondary" onClick={resetForm} className="self-start rounded-full bg-white/10 hover:bg-white/20">
-                Cancel Edit
-              </Button>
-            )}
-          </div>
-
+          
           <div className="grid gap-10 xl:grid-cols-[1.1fr_0.9fr]">
-            {/* Form Section - Stylized to match Booking Form */}
-            <section className="rounded-[1.75rem] border border-white/10 bg-slate-950/45 p-6 shadow-xl shadow-slate-950/30 backdrop-blur-xl sm:p-10">
-              <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
-                {editingId ? <Pencil className="text-cyan-400" size={20} /> : <Plus className="text-cyan-400" size={20} />}
-                {editingId ? "Edit Destination" : "Add New Destination"}
-              </h2>
-              <p className="mb-8 text-sm text-slate-400">
-                Fill in the destination details below and publish updates directly from this panel.
-              </p>
+            
+            {/* Form Section */}
+            <section className="space-y-6">
+              {/* Header logic moved inside the section for a seamless layout */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-4xl font-bold tracking-tight text-white">Admin Control</h1>
+                  <p className="mt-1 text-slate-400">Manage your destination catalog</p>
+                </div>
+                {editingId && (
+                  <Button 
+                    variant="secondary" 
+                    onClick={resetForm} 
+                    className="rounded-full bg-white/10 hover:bg-white/20 transition-all"
+                  >
+                    Cancel Edit
+                  </Button>
+                )}
+              </div>
 
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Name</label>
-                  <Input
-                    placeholder="E.g. Santorini"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className={inputStyles}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Location</label>
-                  <Input
-                    placeholder="E.g. Greece"
-                    value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    className={inputStyles}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Image URL</label>
-                  <Input
-                    placeholder="https://..."
-                    value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className={inputStyles}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Tag</label>
-                  <Input
-                    placeholder="Adventure, Relax, etc."
-                    value={form.tag}
-                    onChange={(e) => setForm({ ...form, tag: e.target.value })}
-                    className={inputStyles}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Short Description</label>
-                  <Textarea
-                    placeholder="A brief overview..."
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className={`${inputStyles} min-h-[80px]`}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Full Details</label>
-                  <Textarea
-                    placeholder="Markdown supported content..."
-                    value={form.details}
-                    onChange={(e) => setForm({ ...form, details: e.target.value })}
-                    className={`${inputStyles} h-40`}
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="md:col-span-2 w-full bg-cyan-500 py-6 text-white shadow-xl shadow-cyan-500/20 transition-all hover:bg-cyan-400 hover:scale-[1.01] rounded-2xl"
-                >
-                  {editingId ? "Update Destination" : "Create Destination"}
-                </Button>
-              </form>
+              <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/45 p-6 shadow-xl shadow-slate-950/30 backdrop-blur-xl sm:p-10">
+                <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold">
+                  {editingId ? <Pencil className="text-cyan-400" size={20} /> : <Plus className="text-cyan-400" size={20} />}
+                  {editingId ? "Update Destination" : "New Destination"}
+                </h2>
+
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Name</label>
+                    <Input
+                      placeholder="E.g. Santorini"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className={inputStyles}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Location</label>
+                    <Input
+                      placeholder="E.g. Greece"
+                      value={form.location}
+                      onChange={(e) => setForm({ ...form, location: e.target.value })}
+                      className={inputStyles}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Image URL</label>
+                    <Input
+                      placeholder="https://..."
+                      value={form.image}
+                      onChange={(e) => setForm({ ...form, image: e.target.value })}
+                      className={inputStyles}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Tag</label>
+                    <Input
+                      placeholder="Adventure, Relax, etc."
+                      value={form.tag}
+                      onChange={(e) => setForm({ ...form, tag: e.target.value })}
+                      className={inputStyles}
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Short Description</label>
+                    <Textarea
+                      placeholder="A brief overview..."
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      className={`${inputStyles} min-h-[80px]`}
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Full Details</label>
+                    <Textarea
+                      placeholder="Markdown supported content..."
+                      value={form.details}
+                      onChange={(e) => setForm({ ...form, details: e.target.value })}
+                      className={`${inputStyles} h-40`}
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="md:col-span-2 w-full bg-cyan-500 py-6 text-white shadow-xl shadow-cyan-500/20 transition-all hover:bg-cyan-400 hover:scale-[1.01] rounded-2xl"
+                  >
+                    {editingId ? "Update Destination" : "Create Destination"}
+                  </Button>
+                </form>
+              </div>
             </section>
 
             {/* Library Section */}
@@ -306,10 +317,10 @@ export default function AdminDashboard() {
               <div className="rounded-[1.75rem] border border-white/5 bg-slate-900/30 p-8 backdrop-blur-sm">
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-400">Library</p>
                 <h2 className="mt-2 text-2xl font-semibold text-white">
-                  Existing Destinations ({destinations.length})
+                  Destinations ({destinations.length})
                 </h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  Review, update, or remove live destination entries.
+                  Review and manage live entries.
                 </p>
               </div>
 

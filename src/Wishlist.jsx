@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast, Toaster } from "sonner"
 import { AnimatePresence, motion as Motion } from "framer-motion"
-import { Briefcase, Heart, Home, LayoutDashboard, Map, Ticket} from "lucide-react"
+import { Briefcase, Heart, Home, LayoutDashboard, Map, Ticket,Pencil} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { fetchDestinations } from "@/lib/destinations"
 import { DestinationCard } from "./Landmark.jsx"
@@ -211,8 +211,9 @@ export default function Dashboard() {
         <nav className="flex flex-1 flex-col gap-2 px-4">
           <SidebarLink to="/" icon={<Home size={18} />} label="Home" />
           <SidebarLink to="/destinations" icon={<Map size={18} />} label="Destinations" />
-          <SidebarLink to="/bookings" icon={<Ticket size={18} />} label="Bookings" />
-          <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active />
+          <SidebarLink to="/booking" icon={<Ticket size={18} />} label="Bookings" />
+          <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+          <SidebarLink to="/admin" icon={<Pencil size={18} />} label="Admin" />
         </nav>
 
         <div className="mt-auto border-t border-white/5 p-4">
