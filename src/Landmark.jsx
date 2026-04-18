@@ -15,7 +15,7 @@ export function DestinationCard({
   onCardClick,
 }) {
   return (
-    <Card
+  <Card
       onClick={onCardClick}
       className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-slate-950/45 backdrop-blur-xl transition hover:scale-[1.02] hover:shadow-xl"
     >
@@ -32,15 +32,15 @@ export function DestinationCard({
             if (!disabled) onToggleFavorite()
           }}
           className={`absolute right-3 top-3 rounded-full p-2 transition ${
-            disabled
-              ? "cursor-not-allowed bg-slate-600/50 text-slate-300"
-              : isFavorite
+            // If it IS a favorite, show red.
+            // If NOT a favorite (or disabled/logged out), show the muted white/gray.
+            isFavorite
               ? "bg-red-100 text-red-600 shadow-lg shadow-red-500/20 hover:bg-red-200"
               : "bg-white/20 text-white hover:bg-white/30"
-          }`}
+          } ${disabled && !isFavorite ? "cursor-not-allowed opacity-70" : ""}`}
         >
           {isFavorite ? (
-            <Heart className="h-4 w-4" />
+            <Heart className="h-4 w-4 fill-current" /> // Added fill-current to make it pop
           ) : (
             <HeartOff className="h-4 w-4" />
           )}

@@ -22,6 +22,8 @@ function Login() {
     setError("")
     setIsLoading(true)
 
+    const ADMIN_EMAIL = "Nathnaeltm17@gmail.com"
+
     try {
       const loginIdentifier = identifier.trim()
       const normalizedIdentifier = loginIdentifier.toLowerCase()

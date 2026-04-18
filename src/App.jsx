@@ -10,6 +10,7 @@ import Dashboard from "./Wishlist.jsx"
 import Profile from "./Profile.jsx"
 import ForgotPassword from "./ForgotPassword.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
+import AdminDashboard from "./AdminDashboard.jsx"
 
 function App() {
   const backgroundImage = "url('https://resources.travellocal.com/wp/uploads/2023/09/10132016/South-Africa-landscape-un-scaled.jpg')"
@@ -29,6 +30,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/destinations" element={<Destinations />} />
           <Route path="/destination/:id" element={<DestinationDetail />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route
             path="/booking"
             element={
@@ -54,6 +56,7 @@ function App() {
             }
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          
         </Routes>
       </div>
     </div>

@@ -28,15 +28,13 @@ function Header() {
     }
   }, [menuOpen])
 
+  // Dashboard is now included by default for everyone
   const navItems = [
     { label: "Home", href: "/home" },
     { label: "Destinations", href: "/destinations" },
     { label: "Booking", href: "/booking" },
+    { label: "Dashboard", href: "/dashboard" }, 
   ]
-
-  if (user) {
-    navItems.push({ label: "Dashboard", href: "/dashboard" })
-  }
 
   const profileInitial = user?.username?.[0]?.toUpperCase() || user?.name?.[0]?.toUpperCase() || "U"
 
