@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2, Pencil, Globe, LogOut } from "lucide-react"
+import {
+  Globe,
+  Home,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Map,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react"
 import { isAdminEmail } from "./lib/admin"
 
 export default function AdminDashboard() {
@@ -12,15 +23,20 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [destinations, setDestinations] = useState([])
   const [editingId, setEditingId] = useState(null)
-
   const [form, setForm] = useState({
-    name: "", location: "", image: "", description: "", details: "", tag: "",
+    name: "",
+    location: "",
+    image: "",
+    description: "",
+    details: "",
+    tag: "",
   })
 
   useEffect(() => {
-    // 1. Initial Check
     const initializeAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       setUser(user)
       if (isAdminEmail(user?.email)) {
         fetchDestinations()
@@ -30,8 +46,9 @@ export default function AdminDashboard() {
 
     initializeAuth()
 
-    // 2. Listen for auth changes (Login/Logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
       if (isAdminEmail(currentUser?.email)) {
@@ -46,24 +63,26 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from("destinations")
       .select("*")
-      .order('created_at', { ascending: false })
-    
+      .order("created_at", { ascending: false })
+
     if (error) {
-      toast.error("Failed to load destinations: " + error.message)
-    } else {
-      setDestinations(data || [])
+      toast.error(`Failed to load destinations: ${error.message}`)
+      return
     }
+
+    setDestinations(data || [])
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
     if (!user || !isAdminEmail(user.email)) {
       return toast.error("Unauthorized action")
     }
 
     const loadingToast = toast.loading(editingId ? "Updating..." : "Adding...")
 
-    const { error } = editingId 
+    const { error } = editingId
       ? await supabase.from("destinations").update(form).eq("id", editingId)
       : await supabase.from("destinations").insert([form])
 
@@ -79,7 +98,14 @@ export default function AdminDashboard() {
   }
 
   const resetForm = () => {
-    setForm({ name: "", location: "", image: "", description: "", details: "", tag: "" })
+    setForm({
+      name: "",
+      location: "",
+      image: "",
+      description: "",
+      details: "",
+      tag: "",
+    })
     setEditingId(null)
   }
 
@@ -91,22 +117,23 @@ export default function AdminDashboard() {
       image: destination.image || "",
       description: destination.description || "",
       details: destination.details || "",
-      tag: destination.tag || ""
+      tag: destination.tag || "",
     })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this?")) return
-    
+
     const { error } = await supabase.from("destinations").delete().eq("id", id)
-    
+
     if (error) {
       toast.error(error.message)
-    } else {
-      fetchDestinations()
-      toast.success("Deleted successfully")
+      return
     }
+
+    fetchDestinations()
+    toast.success("Deleted successfully")
   }
 
   const handleLogout = async () => {
@@ -114,128 +141,248 @@ export default function AdminDashboard() {
     window.location.href = "/login"
   }
 
-  if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
-      <Loader2 className="animate-spin" />
-    </div>
-  )
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0a] text-white">
+        <Loader2 className="animate-spin text-cyan-500" />
+      </div>
+    )
+  }
 
-  // Strict check with lowercase normalization
   if (!user || !isAdminEmail(user.email)) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-white space-y-4 p-6 text-center">
-        <h1 className="text-2xl font-bold">Access Denied</h1>
-        <p className="text-slate-400 max-w-sm">
-          You are signed in as <span className="text-white font-mono">{user?.email || "Guest"}</span>. 
+      <div className="flex h-screen flex-col items-center justify-center space-y-4 bg-[#0a0a0a] p-6 text-center text-white">
+        <h1 className="text-2xl font-bold text-white">Access Denied</h1>
+        <p className="max-w-sm text-slate-400">
+          You are signed in as <span className="font-mono text-white">{user?.email || "Guest"}</span>.
           Please sign in with the admin account.
         </p>
         <div className="flex gap-4">
-            <Button variant="outline" onClick={handleLogout}>Sign Out</Button>
-            <Button onClick={() => window.location.href = "/login"}>Go to Login</Button>
+          <Button variant="outline" onClick={handleLogout} className="border-white/10 hover:bg-white/5">
+            Sign Out
+          </Button>
+          <Button onClick={() => (window.location.href = "/login")} className="bg-cyan-600 hover:bg-cyan-500">
+            Go to Login
+          </Button>
         </div>
       </div>
     )
   }
 
+  // Common Input Styles to match Booking component
+  const inputStyles = "border-white/10 bg-slate-950/45 text-slate-100 backdrop-blur-xl transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 rounded-2xl"
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-10 max-w-5xl mx-auto">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-slate-400 text-sm">Welcome back, {user.email}</p>
+    <div className="flex min-h-screen bg-[#0a0a0a] text-white">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-white/5 bg-slate-900/40 backdrop-blur-xl lg:flex">
+        <div className="p-8">
+          <Link to="/home" className="text-2xl font-bold tracking-tighter text-white">
+            <h1 className="text-2xl font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm">
+              Tourism
+            </h1>
+          </Link>
         </div>
-        <div className="flex gap-2">
-            {editingId && <Button variant="secondary" onClick={resetForm}>Cancel Edit</Button>}
-            <Button variant="ghost" onClick={handleLogout} className="text-slate-400 hover:text-white">
-                <LogOut size={18} className="mr-2" /> Logout
-            </Button>
-        </div>
-      </div>
 
-      {/* Form Section */}
-      <div className="bg-white/5 border border-white/10 p-6 rounded-2xl mb-12 shadow-xl">
-        <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-            {editingId ? <Pencil size={18} /> : <Plus size={18} />}
-            {editingId ? "Edit Destination" : "Add New Destination"}
-        </h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input 
-            placeholder="Name" 
-            value={form.name} 
-            onChange={(e) => setForm({...form, name: e.target.value})} 
-            className="bg-white/5 border-white/10" 
-            required 
-          />
-          <Input 
-            placeholder="Location" 
-            value={form.location} 
-            onChange={(e) => setForm({...form, location: e.target.value})} 
-            className="bg-white/5 border-white/10" 
-            required 
-          />
-          <Input 
-            placeholder="Image URL" 
-            value={form.image} 
-            onChange={(e) => setForm({...form, image: e.target.value})} 
-            className="bg-white/5 border-white/10" 
-          />
-          <Input 
-            placeholder="Tag (e.g. Adventure, Relax)" 
-            value={form.tag} 
-            onChange={(e) => setForm({...form, tag: e.target.value})} 
-            className="bg-white/5 border-white/10" 
-          />
-          <div className="md:col-span-2">
-            <Textarea 
-                placeholder="Short Description" 
-                value={form.description} 
-                onChange={(e) => setForm({...form, description: e.target.value})} 
-                className="bg-white/5 border-white/10" 
-            />
+        <nav className="flex flex-1 flex-col gap-2 px-4">
+          <SidebarLink to="/home" icon={<Home size={18} />} label="Home" />
+          <SidebarLink to="/destinations" icon={<Map size={18} />} label="Destinations" />
+          <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+          <SidebarLink to="/admin" icon={<Pencil size={18} />} label="Admin" active />
+        </nav>
+
+        <div className="mt-auto border-t border-white/5 p-4">
+          <div className="rounded-xl bg-white/5 px-4 py-3">
+            <p className="text-xs text-slate-500">Admin account</p>
+            <p className="mt-1 truncate text-sm font-medium">{user.email}</p>
           </div>
-          <div className="md:col-span-2">
-            <Textarea 
-                placeholder="Full Details (Markdown supported)" 
-                value={form.details} 
-                onChange={(e) => setForm({...form, details: e.target.value})} 
-                className="bg-white/5 border-white/10 h-32" 
-            />
-          </div>
-          <Button type="submit" className="md:col-span-2 w-full bg-blue-600 hover:bg-blue-700">
-            {editingId ? "Update Destination" : "Create Destination"}
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="mt-3 w-full justify-start text-slate-300 hover:bg-white/5 hover:text-white"
+          >
+            <LogOut size={18} className="mr-2" />
+            Logout
           </Button>
-        </form>
-      </div>
+        </div>
+      </aside>
 
-      {/* List Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold mb-2">Existing Destinations ({destinations.length})</h2>
-        {destinations.length === 0 ? (
-            <p className="text-slate-500 italic">No destinations found. Add your first one above!</p>
-        ) : (
-            destinations.map((d) => (
-                <div key={d.id} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between group hover:border-white/30 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-slate-800 flex items-center justify-center overflow-hidden border border-white/10">
-                      {d.image ? <img src={d.image} alt="" className="object-cover h-full w-full" /> : <Globe size={20} className="text-slate-500" />}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-100">{d.name}</h3>
-                      <p className="text-xs text-slate-400">{d.location} • {d.tag || 'No Tag'}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="icon" variant="ghost" onClick={() => handleEdit(d)} className="text-slate-400 hover:text-white hover:bg-white/10">
-                      <Pencil size={18} />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(d.id)} className="text-red-400 hover:text-red-500 hover:bg-red-500/10">
-                      <Trash2 size={18} />
-                    </Button>
-                  </div>
+      {/* Main Content */}
+      <main className="flex-1 lg:ml-64">
+        <div className="mx-auto max-w-6xl p-6 lg:p-12">
+          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight">Admin Dashboard</h1>
+              <p className="mt-2 text-slate-400">
+                Manage destination content and keep the catalog up to date.
+              </p>
+            </div>
+            {editingId && (
+              <Button variant="secondary" onClick={resetForm} className="self-start rounded-full bg-white/10 hover:bg-white/20">
+                Cancel Edit
+              </Button>
+            )}
+          </div>
+
+          <div className="grid gap-10 xl:grid-cols-[1.1fr_0.9fr]">
+            {/* Form Section - Stylized to match Booking Form */}
+            <section className="rounded-[1.75rem] border border-white/10 bg-slate-950/45 p-6 shadow-xl shadow-slate-950/30 backdrop-blur-xl sm:p-10">
+              <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
+                {editingId ? <Pencil className="text-cyan-400" size={20} /> : <Plus className="text-cyan-400" size={20} />}
+                {editingId ? "Edit Destination" : "Add New Destination"}
+              </h2>
+              <p className="mb-8 text-sm text-slate-400">
+                Fill in the destination details below and publish updates directly from this panel.
+              </p>
+
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Name</label>
+                  <Input
+                    placeholder="E.g. Santorini"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={inputStyles}
+                    required
+                  />
                 </div>
-              ))
-        )}
-      </div>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Location</label>
+                  <Input
+                    placeholder="E.g. Greece"
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    className={inputStyles}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Image URL</label>
+                  <Input
+                    placeholder="https://..."
+                    value={form.image}
+                    onChange={(e) => setForm({ ...form, image: e.target.value })}
+                    className={inputStyles}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Tag</label>
+                  <Input
+                    placeholder="Adventure, Relax, etc."
+                    value={form.tag}
+                    onChange={(e) => setForm({ ...form, tag: e.target.value })}
+                    className={inputStyles}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Short Description</label>
+                  <Textarea
+                    placeholder="A brief overview..."
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className={`${inputStyles} min-h-[80px]`}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-xs uppercase tracking-widest text-slate-400 ml-1">Full Details</label>
+                  <Textarea
+                    placeholder="Markdown supported content..."
+                    value={form.details}
+                    onChange={(e) => setForm({ ...form, details: e.target.value })}
+                    className={`${inputStyles} h-40`}
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="md:col-span-2 w-full bg-cyan-500 py-6 text-white shadow-xl shadow-cyan-500/20 transition-all hover:bg-cyan-400 hover:scale-[1.01] rounded-2xl"
+                >
+                  {editingId ? "Update Destination" : "Create Destination"}
+                </Button>
+              </form>
+            </section>
+
+            {/* Library Section */}
+            <section className="space-y-6">
+              <div className="rounded-[1.75rem] border border-white/5 bg-slate-900/30 p-8 backdrop-blur-sm">
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-400">Library</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">
+                  Existing Destinations ({destinations.length})
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Review, update, or remove live destination entries.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {destinations.length === 0 ? (
+                  <div className="rounded-[1.75rem] border border-dashed border-white/10 p-12 text-center text-slate-500">
+                    No destinations found.
+                  </div>
+                ) : (
+                  destinations.map((d) => (
+                    <div
+                      key={d.id}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:border-white/30 hover:bg-white/[0.07]"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-slate-800">
+                            {d.image ? (
+                              <img src={d.image} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <Globe size={22} className="text-slate-500" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-slate-100">{d.name}</h3>
+                            <p className="text-xs text-slate-400">
+                              {d.location} • <span className="text-cyan-400/80">{d.tag || "No Tag"}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleEdit(d)}
+                            className="rounded-full text-slate-400 hover:bg-white/10 hover:text-white"
+                          >
+                            <Pencil size={18} />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleDelete(d.id)}
+                            className="rounded-full text-red-400 hover:bg-red-500/10 hover:text-red-500"
+                          >
+                            <Trash2 size={18} />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
     </div>
+  )
+}
+
+function SidebarLink({ to, icon, label, active = false }) {
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all ${
+        active
+          ? "bg-cyan-500/10 font-medium text-cyan-400"
+          : "text-slate-400 hover:bg-white/5 hover:text-white"
+      }`}
+    >
+      {icon}
+      {label}
+    </Link>
   )
 }
