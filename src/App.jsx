@@ -15,18 +15,27 @@ import AdminDashboard from "./AdminDashboard.jsx"
 function App() {
   const location = useLocation()
   const backgroundImage = "url('https://resources.travellocal.com/wp/uploads/2023/09/10132016/South-Africa-landscape-un-scaled.jpg')"
+  
+  // Logic to determine current route
   const isDashboardRoute = location.pathname === "/dashboard"
+  const isAdminRoute = location.pathname === "/admin"
   const isHomeRoute = location.pathname === "/" || location.pathname === "/home"
-  const contentClassName = isDashboardRoute || isHomeRoute ? "" : "pt-28"
+
+  // If it's the Dashboard, Home, or Admin page, we remove the top padding (pt-28)
+  const contentClassName = isDashboardRoute || isHomeRoute || isAdminRoute ? "" : "pt-28"
 
   return (
     <div
       className="relative min-h-screen bg-slate-950 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage }}
     >
+      {/* Dark Overlay */}
       <div className="absolute inset-0 bg-slate-950/70" />
+      
       <div className={`relative z-10 ${contentClassName}`}>
-        {!isDashboardRoute ? <Header /> : null}
+        {/* Hide Header if on Dashboard OR Admin page */}
+        {!isDashboardRoute && !isAdminRoute ? <Header /> : null}
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -35,6 +44,7 @@ function App() {
           <Route path="/destinations" element={<Destinations />} />
           <Route path="/destination/:id" element={<DestinationDetail />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          
           <Route
             path="/booking"
             element={
@@ -43,6 +53,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/dashboard"
             element={
@@ -51,6 +62,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/profile"
             element={
@@ -59,8 +71,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
           
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </div>
     </div>
