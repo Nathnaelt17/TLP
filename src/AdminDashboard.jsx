@@ -16,6 +16,8 @@ import {
   Plus,
   Trash2,
   Ticket,
+  Menu,
+  X,
 } from "lucide-react"
 import { isAdminEmail } from "./lib/admin"
 import { useAuth } from "./context/AuthContext.jsx"
@@ -24,6 +26,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [destinations, setDestinations] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({
@@ -177,14 +180,28 @@ export default function AdminDashboard() {
   return (
     
     <div className="flex min-h-screen bg-transparent text-white">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar - Consistent with User Dashboard */}
-      <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-white/5 bg-slate-900/40 backdrop-blur-xl lg:flex">
-        <div className="p-8">
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/5 bg-slate-900/95 backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 lg:bg-slate-900/40 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex items-center justify-between p-8">
           <Link to="/" className="text-2xl font-bold tracking-tighter text-white">
             <h1 className="text-2xl font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm">
               Tourism
             </h1>
           </Link>
+          <button 
+            className="lg:hidden text-slate-400 hover:text-white"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex flex-1 flex-col gap-2 px-4">
@@ -218,7 +235,20 @@ export default function AdminDashboard() {
 
       {/* Main Content Area */}
       <main className="flex-1 lg:ml-64">
-        <div className="mx-auto max-w-6xl p-6 lg:p-12">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between p-6 lg:hidden">
+          <h1 className="text-xl font-bold uppercase tracking-[0.2em] text-white drop-shadow-sm">
+            Tourism
+          </h1>
+          <button 
+            className="text-slate-100"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+
+        <div className="mx-auto max-w-6xl px-6 pb-6 lg:p-12">
           
           <div className="grid gap-10 xl:grid-cols-[1.1fr_0.9fr]">
             
