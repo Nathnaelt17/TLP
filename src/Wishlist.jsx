@@ -8,6 +8,7 @@ import { fetchDestinations } from "@/lib/destinations"
 import { DestinationCard } from "./Landmark.jsx"
 import { supabase } from "./supabase-client"
 import { useAuth } from "./context/AuthContext.jsx"
+import { isAdminEmail } from "./lib/admin"
 
 function BookingList({ bookings, onCancelBooking }) {
   if (bookings.length === 0) {
@@ -214,7 +215,9 @@ export default function Dashboard() {
           <SidebarLink to="/destinations" icon={<Map size={18} />} label="Destinations" />
           <SidebarLink to="/booking" icon={<Ticket size={18} />} label="Bookings" />
           <SidebarLink to="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-          <SidebarLink to="/admin" icon={<Pencil size={18} />} label="Admin" />
+          {isAdminEmail(user?.email) && (
+            <SidebarLink to="/admin" icon={<Pencil size={18} />} label="Admin" />
+          )}
         </nav>
 
         <div className="mt-auto border-t border-white/5 p-4">
