@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import {
   FaArrowRight,
@@ -113,6 +113,30 @@ function Signup() {
     }
 
     try {
+      // Pre-check for duplicate username
+      const { data: existingUsername, error: usernameError } = await supabase.rpc("lookup_user_email", {
+        p_username: normalizedUsername,
+        p_phone: null,
+      })
+
+      if (existingUsername) {
+        setSignupError("This username is already taken. Please choose another one.")
+        setIsLoading(false)
+        return
+      }
+
+      // Pre-check for duplicate phone number
+      const { data: existingPhone, error: phoneError } = await supabase.rpc("lookup_user_email", {
+        p_username: null,
+        p_phone: normalizedPhone,
+      })
+
+      if (existingPhone) {
+        setSignupError("An account with this phone number already exists.")
+        setIsLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
